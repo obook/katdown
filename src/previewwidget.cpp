@@ -5,11 +5,13 @@
 
 #include <QAction>
 #include <QCheckBox>
+#include <QCursor>
 #include <QDesktopServices>
 #include <QIcon>
 #include <QJsonObject>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolTip>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QWebEngineProfile>
@@ -83,6 +85,11 @@ PreviewWidget::PreviewWidget(KTextEditor::MainWindow *mainWindow, KTextEditor::V
     page->onLinkActivated = [this](const QUrl &url) {
         openLink(url);
     };
+    // Where a link goes, shown while the pointer is on it. Leaving the link sends an
+    // empty address, which hides the tip.
+    connect(page, &QWebEnginePage::linkHovered, this, [this](const QString &address) {
+        QToolTip::showText(QCursor::pos(), linkHint(QUrl(address), baseUrl()), m_web);
+    });
     m_web->setPage(page);
     // The menu is built in showContextMenu() instead of being left to Qt WebEngine.
     m_web->setContextMenuPolicy(Qt::CustomContextMenu);

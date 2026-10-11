@@ -131,7 +131,7 @@ The documents in [`examples/`](examples) show what the preview renders:
 | Show or hide the preview | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, the **Preview** button of the main toolbar or Tools > Preview |
 | See the document as GitHub will show it | Check **GitHub only** above the preview |
 | Export what the preview shows | The **PDF** and **HTML** buttons above the preview, or Tools > Export Preview as PDF and Tools > Export Preview as HTML |
-| Follow a link | Click it: a local file opens in Kate, a web address in your browser, a link to a heading scrolls the preview |
+| Follow a link | Click it: a local file opens in Kate, a web address in your browser, a link to a heading scrolls the preview. Point at it to see where it goes |
 | Zoom a Mermaid diagram | <kbd>Ctrl</kbd> + mouse wheel over it; a double click puts it back |
 | Paste a picture | Copy an image, then paste in the editor |
 
