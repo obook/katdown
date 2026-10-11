@@ -2,6 +2,7 @@
 // HTML export, pasting a picture.
 
 #include "imagepaste.h"
+#include "previewutil.h"
 #include "settings.h"
 #include "testhelpers.h"
 
@@ -27,6 +28,7 @@ private Q_SLOTS:
     void exportsPdfAndHtml();
     void pastesClipboardImage();
     void loadsRemoteImageOnlyWhenAllowed();
+    void findsWhereALocalLinkPoints();
 };
 
 // Scroll sync runs both ways between a real editor view and the page: the block at the top
@@ -193,6 +195,26 @@ void InteractionTest::loadsRemoteImageOnlyWhenAllowed()
 
     Settings::self()->setLoadRemoteMedia(false);
     delete doc;
+}
+
+// The page resolves every link against the folder of the document, which is wrong for
+// "~/notes" and falls short for a wiki link written without ".md".
+void InteractionTest::findsWhereALocalLinkPoints()
+{
+    const QUrl base = QUrl::fromLocalFile(m_dir.path() + QLatin1Char('/'));
+    auto target = [&base](const char *link) {
+        return localLinkTarget(base.resolved(QUrl(QLatin1String(link))), base);
+    };
+
+    QCOMPARE(target("~/Notes/test").toLocalFile(), QDir::homePath() + QLatin1String("/Notes/test"));
+    QCOMPARE(target("sample").toLocalFile(), m_path);
+    QCOMPARE(target("sample#title").fragment(), QStringLiteral("title"));
+    QCOMPARE(target("sample.md").toLocalFile(), m_path);
+    QCOMPARE(target("missing").toLocalFile(), m_dir.filePath(QStringLiteral("missing")));
+
+    // A folder really named "~" beside the document keeps its links.
+    QVERIFY(QDir(m_dir.path()).mkdir(QStringLiteral("~")));
+    QCOMPARE(target("~/").toLocalFile(), m_dir.filePath(QStringLiteral("~/")));
 }
 
 QTEST_MAIN(InteractionTest)
