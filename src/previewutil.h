@@ -62,3 +62,16 @@ inline QUrl localLinkTarget(const QUrl &url, const QUrl &base)
     target.setFragment(url.fragment());
     return target;
 }
+
+// What to show while the pointer is on a link: "#heading" for a heading of this page,
+// the path of a local file, the address of anything else.
+inline QString linkHint(const QUrl &url, const QUrl &base)
+{
+    if (url.hasFragment() && url.matches(base, QUrl::RemoveFragment)) {
+        return QLatin1Char('#') + url.fragment();
+    }
+    if (url.isLocalFile()) {
+        return localLinkTarget(url, base).toDisplayString(QUrl::PreferLocalFile);
+    }
+    return url.toDisplayString();
+}

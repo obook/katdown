@@ -12,6 +12,7 @@
 #include <QSignalSpy>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QToolTip>
 #include <QWheelEvent>
 
 #include <KTextEditor/View>
@@ -29,6 +30,7 @@ private Q_SLOTS:
     void pastesClipboardImage();
     void loadsRemoteImageOnlyWhenAllowed();
     void findsWhereALocalLinkPoints();
+    void showsWhereAHoveredLinkGoes();
 };
 
 // Scroll sync runs both ways between a real editor view and the page: the block at the top
@@ -215,6 +217,36 @@ void InteractionTest::findsWhereALocalLinkPoints()
     // A folder really named "~" beside the document keeps its links.
     QVERIFY(QDir(m_dir.path()).mkdir(QStringLiteral("~")));
     QCOMPARE(target("~/").toLocalFile(), m_dir.filePath(QStringLiteral("~/")));
+}
+
+// Pointing at a link shows its target, as a browser does.
+void InteractionTest::showsWhereAHoveredLinkGoes()
+{
+    const QUrl base = QUrl::fromLocalFile(m_dir.path() + QLatin1Char('/'));
+    QCOMPARE(linkHint(base.resolved(QUrl(QStringLiteral("sample"))), base), m_path);
+    QCOMPARE(linkHint(base.resolved(QUrl(QStringLiteral("#title"))), base), QStringLiteral("#title"));
+    QCOMPARE(linkHint(QUrl(QStringLiteral("https://kde.org/")), base), QStringLiteral("https://kde.org/"));
+    QCOMPARE(linkHint(QUrl(), base), QString());
+
+    KTextEditor::Document *doc = openDocument();
+    QTRY_VERIFY(doc->text().contains(Body));
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
+    QVERIFY(waitForPageText(preview.get(), Body));
+    preview->resize(600, 400);
+    preview->show();
+    doc->setText(QStringLiteral("[the link](https://kde.org/)\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("the link")));
+    const QStringList middle = evalJs(preview.get(),
+                                      QStringLiteral("(function () { var r = document.querySelector('a').getBoundingClientRect();"
+                                                     " return Math.round(r.left + r.width / 2) + ',' + Math.round(r.top + r.height / 2); })()"))
+                                   .split(QLatin1Char(','));
+    QCOMPARE(middle.size(), 2);
+    QWidget *page = preview->findChild<QWebEngineView *>()->focusProxy();
+    QTest::mouseMove(page, QPoint(middle.at(0).toInt(), middle.at(1).toInt()));
+    QTRY_COMPARE_WITH_TIMEOUT(QToolTip::text(), QStringLiteral("https://kde.org/"), 5000);
+    QToolTip::hideText();
+    preview.reset();
+    delete doc;
 }
 
 QTEST_MAIN(InteractionTest)
