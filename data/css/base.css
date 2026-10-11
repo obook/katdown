@@ -213,3 +213,20 @@ html[data-pv-scheme="dark"] .markdown-body .alert-danger {
   text-align: left;
   word-break: break-all;
 }
+
+/* The browser draws a disabled checkbox pale grey, whatever the theme: draw the task
+   boxes here, in the colors of the theme. */
+.markdown-body .task-list-item-checkbox {
+  appearance: none;
+  width: 1em;
+  height: 1em;
+  border: 1px solid var(--fgColor-muted, #59636e);
+  border-radius: 3px;
+}
+
+.markdown-body .task-list-item-checkbox:checked {
+  border-color: var(--fgColor-accent, #0969da);
+  background: var(--fgColor-accent, #0969da)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.5' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
