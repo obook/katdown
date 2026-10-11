@@ -5,11 +5,14 @@
 
 #pragma once
 
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
+#include <QUrl>
 
 inline QString readAsset(const QString &path)
 {
@@ -37,4 +40,25 @@ inline QString jsLiteral(const QString &s)
 inline QString compactJson(const QJsonObject &obj)
 {
     return QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+}
+
+// The file a clicked link means. The page resolves every link against the folder of the
+// document (base), so "~/notes" arrives as "<folder>/~/notes", and a wiki link written
+// without its extension names a file that is not there.
+inline QUrl localLinkTarget(const QUrl &url, const QUrl &base)
+{
+    QString path = url.toLocalFile();
+    if (QFileInfo::exists(path)) {
+        return url;
+    }
+    const QString tilde = base.toLocalFile() + QLatin1String("~/");
+    if (path.startsWith(tilde)) {
+        path = QDir::homePath() + QLatin1Char('/') + path.mid(tilde.size());
+    }
+    if (!QFileInfo::exists(path) && QFileInfo::exists(path + QLatin1String(".md"))) {
+        path += QLatin1String(".md");
+    }
+    QUrl target = QUrl::fromLocalFile(path);
+    target.setFragment(url.fragment());
+    return target;
 }

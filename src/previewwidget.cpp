@@ -186,7 +186,7 @@ PreviewWidget::~PreviewWidget()
 void PreviewWidget::openLink(const QUrl &url)
 {
     if (url.isLocalFile() && m_mainWindow) {
-        m_mainWindow->openUrl(url);
+        m_mainWindow->openUrl(localLinkTarget(url, baseUrl()));
     } else if (!url.scheme().isEmpty()) {
         QDesktopServices::openUrl(url);
     }
