@@ -38,11 +38,10 @@ body:
     id: ai
     attributes:
       label: AI
-      description: Using AI is fine as long as you're transparent with its usage.
+      description: "Using AI is fine: say how much you used it."
       options:
         - no AI
         - AI-assisted, I reviewed everything
         - AI did most of it under my direction
-        - autonomous agent (use the "Feature request (agent)" form instead)
     validations:
       required: true

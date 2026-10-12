@@ -6,11 +6,11 @@ Install or remove Katemark in a Kate for Windows installation.
 Katemark is a KTextEditor plugin whose preview is a QWebEngineView, and Kate for Windows ships no
 Qt WebEngine. A plugin DLL's transitive imports resolve from the host process directory, so the
 WebEngine runtime has to sit next to kate.exe rather than next to the plugin. This script copies
-the payload tree over the Kate install and records every file it wrote, so -Uninstall can remove
-exactly those and nothing else.
+the payload tree over the Kate install and records every file it wrote, so -Uninstall removes only
+those.
 
-It refuses to touch a Kate whose Qt differs from the one the payload was built against, because the
-failure mode otherwise is a plugin that silently never appears in Kate's plugin list.
+It refuses a Kate whose Qt differs from the payload's: Kate would not load the plugin and would not
+report it.
 
 .PARAMETER KateDir
 Root of the Kate installation (the directory containing bin\kate.exe). Auto-detected when omitted.
@@ -19,8 +19,8 @@ Root of the Kate installation (the directory containing bin\kate.exe). Auto-dete
 Remove the files listed in the manifest written by a previous install.
 
 .PARAMETER Force
-Overwrite destination files that this script did not install. Off by default so a future Kate that
-ships its own WebEngine cannot be quietly clobbered.
+Overwrite destination files that this script did not install. Off by default, so the script does not
+replace the WebEngine a future Kate may ship.
 
 .EXAMPLE
 .\install.ps1
@@ -142,7 +142,7 @@ function Invoke-Install([string]$Dir) {
     $previous = Read-Manifest $Dir
 
     # Never overwrite a file that is not ours: a later Kate could start shipping WebEngine itself,
-    # and replacing its copy with ours would break Kate rather than just Katemark.
+    # and replacing its copy with ours would break Kate.
     $collisions = @()
     foreach ($file in $payload) {
         $rel = Get-RelativePath $PayloadDir $file.FullName
@@ -166,10 +166,8 @@ $(if ($collisions.Count -gt 10) { "  ... and $($collisions.Count - 10) more`n" }
         $written.Add((Get-RelativePath $PayloadDir $file.FullName))
     }
 
-    # The manifest goes down BEFORE the copying, listing what is about to be written. A copy that
-    # dies partway (disk full, a locked DLL) would otherwise leave files behind with nothing
-    # recording them, and -Uninstall could not clean up after itself. Uninstall tolerates entries
-    # that never made it to disk.
+    # Write the manifest before copying: if a copy fails partway (disk full, a locked DLL),
+    # -Uninstall still knows what to remove. It tolerates entries that never reached the disk.
     $manifestPath = Join-Path $Dir $ManifestRel
     if ($PSCmdlet.ShouldProcess($manifestPath, 'Write manifest')) {
         $manifestDir = Split-Path -Parent $manifestPath
@@ -191,8 +189,7 @@ $(if ($collisions.Count -gt 10) { "  ... and $($collisions.Count - 10) more`n" }
         }
     }
 
-    # Stale entries from an older payload that this one no longer ships would otherwise linger
-    # forever, and an uninstall would miss them.
+    # Remove what an older payload shipped and this one does not: an uninstall would miss it.
     $orphans = @($previous | Where-Object { $written -notcontains $_ })
     foreach ($rel in $orphans) {
         $path = Join-Path $Dir $rel
