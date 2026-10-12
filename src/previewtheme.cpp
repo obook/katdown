@@ -51,8 +51,14 @@ struct VarPair {
 
 bool paletteIsDark()
 {
-    const QColor w = qApp->palette().color(QPalette::Active, QPalette::Window);
-    return w.lightnessF() < 0.5;
+    const QColor window = qApp->palette().color(QPalette::Active, QPalette::Window);
+    return window.lightnessF() < 0.5;
+}
+
+bool githubLookIsDark()
+{
+    const Settings *settings = Settings::self();
+    return settings->githubVariant() == Settings::Dark || (settings->githubVariant() == Settings::Auto && paletteIsDark());
 }
 
 QJsonObject githubVars(bool dark)
@@ -88,13 +94,13 @@ QJsonObject githubVars(bool dark)
         {"--borderColor-done-emphasis", "#8250df"},
     };
 
-    QJsonObject v;
-    const VarPair *arr = dark ? darkVars : lightVars;
+    QJsonObject vars;
+    const VarPair *table = dark ? darkVars : lightVars;
     const size_t count = sizeof(darkVars) / sizeof(darkVars[0]); // both tables are the same length
     for (size_t i = 0; i < count; ++i) {
-        v.insert(QString::fromLatin1(arr[i].key), QString::fromLatin1(arr[i].value));
+        vars.insert(QString::fromLatin1(table[i].key), QString::fromLatin1(table[i].value));
     }
-    return v;
+    return vars;
 }
 
 // Derive github-markdown CSS variables from the active editor theme + palette.
@@ -114,27 +120,27 @@ QJsonObject applicationVars(const Theme &theme, bool &outDark)
     const QColor success = colorOr(theme.textColor(Theme::String), QColor(0x1A, 0x7F, 0x37));
     const QColor done = colorOr(theme.textColor(Theme::Keyword), link);
 
-    QJsonObject v;
-    v.insert(QStringLiteral("--fgColor-default"), hex(fg));
-    v.insert(QStringLiteral("--fgColor-muted"), hex(blend(fg, bg, 0.45)));
-    v.insert(QStringLiteral("--fgColor-accent"), hex(link));
-    v.insert(QStringLiteral("--fgColor-danger"), hex(danger));
-    v.insert(QStringLiteral("--fgColor-success"), hex(success));
-    v.insert(QStringLiteral("--fgColor-attention"), hex(attention));
-    v.insert(QStringLiteral("--fgColor-done"), hex(done));
-    v.insert(QStringLiteral("--bgColor-default"), hex(bg));
-    v.insert(QStringLiteral("--bgColor-muted"), hex(blend(bg, fg, 0.04)));
-    v.insert(QStringLiteral("--bgColor-neutral-muted"), rgba(fg, outDark ? 0.14 : 0.08));
-    v.insert(QStringLiteral("--bgColor-attention-muted"), rgba(attention, 0.15));
-    v.insert(QStringLiteral("--borderColor-default"), hex(border));
-    v.insert(QStringLiteral("--borderColor-muted"), rgba(border, 0.7));
-    v.insert(QStringLiteral("--borderColor-neutral-muted"), rgba(border, 0.7));
-    v.insert(QStringLiteral("--borderColor-accent-emphasis"), hex(link));
-    v.insert(QStringLiteral("--borderColor-attention-emphasis"), hex(attention));
-    v.insert(QStringLiteral("--borderColor-danger-emphasis"), hex(danger));
-    v.insert(QStringLiteral("--borderColor-success-emphasis"), hex(success));
-    v.insert(QStringLiteral("--borderColor-done-emphasis"), hex(done));
-    return v;
+    QJsonObject vars;
+    vars.insert(QStringLiteral("--fgColor-default"), hex(fg));
+    vars.insert(QStringLiteral("--fgColor-muted"), hex(blend(fg, bg, 0.45)));
+    vars.insert(QStringLiteral("--fgColor-accent"), hex(link));
+    vars.insert(QStringLiteral("--fgColor-danger"), hex(danger));
+    vars.insert(QStringLiteral("--fgColor-success"), hex(success));
+    vars.insert(QStringLiteral("--fgColor-attention"), hex(attention));
+    vars.insert(QStringLiteral("--fgColor-done"), hex(done));
+    vars.insert(QStringLiteral("--bgColor-default"), hex(bg));
+    vars.insert(QStringLiteral("--bgColor-muted"), hex(blend(bg, fg, 0.04)));
+    vars.insert(QStringLiteral("--bgColor-neutral-muted"), rgba(fg, outDark ? 0.14 : 0.08));
+    vars.insert(QStringLiteral("--bgColor-attention-muted"), rgba(attention, 0.15));
+    vars.insert(QStringLiteral("--borderColor-default"), hex(border));
+    vars.insert(QStringLiteral("--borderColor-muted"), rgba(border, 0.7));
+    vars.insert(QStringLiteral("--borderColor-neutral-muted"), rgba(border, 0.7));
+    vars.insert(QStringLiteral("--borderColor-accent-emphasis"), hex(link));
+    vars.insert(QStringLiteral("--borderColor-attention-emphasis"), hex(attention));
+    vars.insert(QStringLiteral("--borderColor-danger-emphasis"), hex(danger));
+    vars.insert(QStringLiteral("--borderColor-success-emphasis"), hex(success));
+    vars.insert(QStringLiteral("--borderColor-done-emphasis"), hex(done));
+    return vars;
 }
 
 // Build a highlight.js token stylesheet from the active editor theme so code
@@ -142,28 +148,28 @@ QJsonObject applicationVars(const Theme &theme, bool &outDark)
 QString applicationCodeCss(const Theme &theme)
 {
     const QColor fg = colorOr(theme.textColor(Theme::Normal), qApp->palette().color(QPalette::Text));
-    auto tc = [&](Theme::TextStyle s) {
-        return hex(colorOr(theme.textColor(s), fg));
+    auto tokenColor = [&](Theme::TextStyle style) {
+        return hex(colorOr(theme.textColor(style), fg));
     };
 
     QString css;
     css += QStringLiteral(".hljs{color:%1;background:transparent}").arg(hex(fg));
-    css += QStringLiteral(".hljs-comment,.hljs-quote{color:%1;font-style:italic}").arg(tc(Theme::Comment));
-    css += QStringLiteral(".hljs-doctag,.hljs-meta .hljs-doctag{color:%1}").arg(tc(Theme::Documentation));
+    css += QStringLiteral(".hljs-comment,.hljs-quote{color:%1;font-style:italic}").arg(tokenColor(Theme::Comment));
+    css += QStringLiteral(".hljs-doctag,.hljs-meta .hljs-doctag{color:%1}").arg(tokenColor(Theme::Documentation));
     css += QStringLiteral(".hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-section,.hljs-name,.hljs-tag,.hljs-meta "
                           ".hljs-keyword{color:%1}")
-               .arg(tc(Theme::Keyword));
-    css += QStringLiteral(".hljs-built_in,.hljs-builtin-name,.hljs-title.class_,.hljs-class .hljs-title{color:%1}").arg(tc(Theme::BuiltIn));
-    css += QStringLiteral(".hljs-type,.hljs-class{color:%1}").arg(tc(Theme::DataType));
-    css += QStringLiteral(".hljs-string,.hljs-regexp,.hljs-addition,.hljs-meta .hljs-string{color:%1}").arg(tc(Theme::String));
-    css += QStringLiteral(".hljs-number{color:%1}").arg(tc(Theme::DecVal));
-    css += QStringLiteral(".hljs-symbol,.hljs-bullet,.hljs-link,.hljs-char,.hljs-char.escape_{color:%1}").arg(tc(Theme::Char));
-    css += QStringLiteral(".hljs-title,.hljs-title.function_,.hljs-function .hljs-title{color:%1}").arg(tc(Theme::Function));
+               .arg(tokenColor(Theme::Keyword));
+    css += QStringLiteral(".hljs-built_in,.hljs-builtin-name,.hljs-title.class_,.hljs-class .hljs-title{color:%1}").arg(tokenColor(Theme::BuiltIn));
+    css += QStringLiteral(".hljs-type,.hljs-class{color:%1}").arg(tokenColor(Theme::DataType));
+    css += QStringLiteral(".hljs-string,.hljs-regexp,.hljs-addition,.hljs-meta .hljs-string{color:%1}").arg(tokenColor(Theme::String));
+    css += QStringLiteral(".hljs-number{color:%1}").arg(tokenColor(Theme::DecVal));
+    css += QStringLiteral(".hljs-symbol,.hljs-bullet,.hljs-link,.hljs-char,.hljs-char.escape_{color:%1}").arg(tokenColor(Theme::Char));
+    css += QStringLiteral(".hljs-title,.hljs-title.function_,.hljs-function .hljs-title{color:%1}").arg(tokenColor(Theme::Function));
     css += QStringLiteral(".hljs-variable,.hljs-template-variable,.hljs-attr,.hljs-attribute,.hljs-selector-attr,.hljs-selector-class,"
                           ".hljs-selector-id{color:%1}")
-               .arg(tc(Theme::Variable));
-    css += QStringLiteral(".hljs-meta{color:%1}").arg(tc(Theme::Preprocessor));
-    css += QStringLiteral(".hljs-deletion{color:%1}").arg(tc(Theme::Error));
+               .arg(tokenColor(Theme::Variable));
+    css += QStringLiteral(".hljs-meta{color:%1}").arg(tokenColor(Theme::Preprocessor));
+    css += QStringLiteral(".hljs-deletion{color:%1}").arg(tokenColor(Theme::Error));
     css += QStringLiteral(".hljs-emphasis{font-style:italic}.hljs-strong{font-weight:bold}");
     return css;
 }
@@ -173,9 +179,8 @@ void PreviewWidget::applyTheme()
     if (!m_loaded) {
         return;
     }
-    Settings *s = Settings::self();
-    if (s->mode() == Settings::GitHub) {
-        applyGithubLook(s->ghVariant() == Settings::Dark || (s->ghVariant() == Settings::Auto && paletteIsDark()));
+    if (Settings::self()->colorSource() == Settings::GitHub) {
+        applyGithubLook(githubLookIsDark());
     } else {
         const Theme theme = m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme();
         bool dark = false;

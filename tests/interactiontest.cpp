@@ -1,5 +1,9 @@
-// What the preview does with the editor and the files around it: scroll sync, PDF and
-// HTML export, pasting a picture.
+// interactiontest.cpp
+// What the preview does with the editor and the files around it: scroll sync, pasting a
+// picture, pictures from the web, links. The exports are in exporttest.cpp.
+// Author: Olivier Booklage
+// Date: October 2026
+// License: GPL-3.0-or-later
 
 #include "imagepaste.h"
 #include "previewutil.h"
@@ -9,7 +13,6 @@
 #include <QClipboard>
 #include <QDir>
 #include <QImage>
-#include <QSignalSpy>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QToolTip>
@@ -26,7 +29,6 @@ private Q_SLOTS:
         createFixture();
     }
     void followsScrollBothWays();
-    void exportsPdfAndHtml();
     void pastesClipboardImage();
     void loadsRemoteImageOnlyWhenAllowed();
     void findsWhereALocalLinkPoints();
@@ -69,10 +71,10 @@ void InteractionTest::followsScrollBothWays()
     QCoreApplication::sendEvent(editor, &wheel);
     const int first = view->firstDisplayedLine();
     QVERIFY2(first > 20, qPrintable(QStringLiteral("the wheel did not scroll the editor, top line is %1").arg(first)));
-    QTRY_VERIFY_WITH_TIMEOUT(qAbs(blockTop(first)) <= 2, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT(qAbs(blockTop(first)) <= 2, ReactionTimeoutMs);
 
     evalJs(preview.get(), QStringLiteral("document.querySelector('[data-line=\"200\"]').scrollIntoView(); 1"));
-    QTRY_VERIFY_WITH_TIMEOUT(qAbs(view->firstDisplayedLine() - 200) <= 1, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT(qAbs(view->firstDisplayedLine() - 200) <= 1, ReactionTimeoutMs);
     // The editor followed; the page must stay where the reader put it, not be scrolled
     // back by an echo of the editor's move.
     QTest::qWait(500);
@@ -82,52 +84,11 @@ void InteractionTest::followsScrollBothWays()
     delete doc;
 }
 
-// Both exports end with exported(); the files have to hold the rendered document, and the
-// HTML one must stand alone: no script, none of the preview's scroll-sync attributes.
-void InteractionTest::exportsPdfAndHtml()
-{
-    KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
-    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
-    doc->setText(QStringLiteral(":::info\nthe boxed line\n:::\n\nand $a^2$\n\n![red](%1)\n\n<script>var leaked = 1;</script>\n\n<p onclick=\"leak()\">tail</p>\n").arg(ImageName));
-    QCOMPARE(waitForImageWidth(preview.get()), ImageWidth);
-    QVERIFY(waitForPageText(preview.get(), QLatin1String("the boxed line")));
-
-    QSignalSpy exported(preview.get(), &PreviewWidget::exported);
-    const QString pdfPath = m_dir.filePath(QStringLiteral("out.pdf"));
-    preview->exportPdf(pdfPath);
-    QVERIFY(exported.wait(30000));
-    QCOMPARE(exported.takeFirst().at(1).toBool(), true);
-    QFile pdf(pdfPath);
-    QVERIFY(pdf.open(QIODevice::ReadOnly));
-    QVERIFY(pdf.read(5) == QByteArrayLiteral("%PDF-"));
-
-    const QString htmlPath = m_dir.filePath(QStringLiteral("out.html"));
-    preview->exportHtml(htmlPath);
-    QVERIFY(exported.wait(30000));
-    QCOMPARE(exported.takeFirst().at(1).toBool(), true);
-    QFile html(htmlPath);
-    QVERIFY(html.open(QIODevice::ReadOnly));
-    const QString page = QString::fromUtf8(html.readAll());
-    QVERIFY(page.contains(QLatin1String("alert alert-info")));
-    QVERIFY(page.contains(QLatin1String("the boxed line")));
-    QVERIFY(page.contains(QLatin1String("class=\"katex\"")));
-    QVERIFY(page.contains(QLatin1String("KaTeX_Main"))); // the math stylesheet came along
-    QVERIFY(!page.contains(QLatin1String("<script")));
-    QVERIFY(!page.contains(QLatin1String("onclick")));
-    // The picture travels inside the file: it still shows when the file is moved.
-    QVERIFY(page.contains(QLatin1String("src=\"data:image/png;base64,")));
-    QVERIFY(!page.contains(QLatin1String("data-line")));
-
-    delete doc;
-}
-
 // An image-only clipboard becomes a PNG beside the document and a link at the cursor.
 void InteractionTest::pastesClipboardImage()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     KTextEditor::View *view = doc->createView(nullptr);
 
     QImage image(4, 4, QImage::Format_RGB32);
@@ -182,9 +143,9 @@ void InteractionTest::loadsRemoteImageOnlyWhenAllowed()
 
     Settings::self()->setLoadRemoteMedia(false);
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
     doc->setText(source);
     QVERIFY(waitForPageText(preview.get(), QLatin1String("the last line")));
     // Kept out, the picture gives way to a note that names the setting and the address.
@@ -231,9 +192,9 @@ void InteractionTest::showsWhereAHoveredLinkGoes()
     // linkHovered is sent by hand: a pointer moved onto the link by the test showed the
     // tip on every run offscreen, but not on every run with a display.
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
     Q_EMIT preview->findChild<QWebEngineView *>()->page()->linkHovered(QStringLiteral("https://kde.org/"));
     QCOMPARE(QToolTip::text(), QStringLiteral("https://kde.org/"));
     QToolTip::hideText();

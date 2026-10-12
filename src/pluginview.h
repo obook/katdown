@@ -1,3 +1,8 @@
+// pluginview.h
+// PluginView: what the plugin adds to one Kate window.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #pragma once
 
 #include <QObject>
@@ -39,23 +44,33 @@ private:
     // What an editing action does to the view it is given.
     using EditFunction = std::function<void(KTextEditor::View *)>;
 
+    enum class ExportFormat {
+        Pdf,
+        Html,
+    };
+
+    // pluginview.cpp
     static bool isMarkdown(KTextEditor::Document *doc);
-    KTextEditor::View *markdownView() const;
     QAction *addAction(const QString &name, const QString &text, const QIcon &icon);
-    void addEditAction(const QString &name, const QString &text, const QString &iconName, const QKeySequence &shortcut, const EditFunction &edit);
-    void addEditActions();
-    void showMessage(const QString &text, bool isError);
     void togglePreview();
     void syncPreview();
     void onViewChanged(KTextEditor::View *view);
-    void pasteImage();
-    void exportPreview(bool pdf);
+    void exportPreview(ExportFormat format);
     void onExported(const QString &path, bool ok);
-    void onToolViewShown(bool shown);
+    void setExportsOffered(bool toolViewVisible);
+    void applyToolViewVisibility(bool visible);
+
+    // pluginviewedit.cpp
+    KTextEditor::View *markdownView() const;
+    void addEditAction(const QString &name, const QString &text, const QString &iconName, const QKeySequence &shortcut, const EditFunction &edit);
+    void addEditActions();
+    void showMessage(const QString &text, bool isError, const QString &fileToOpen = QString());
+    void pasteImage();
 
     KTextEditor::MainWindow *m_mainWindow = nullptr;
     QPointer<QWidget> m_toolView;
     QPointer<PreviewWidget> m_preview;
+    QPointer<QWidget> m_hint; // what the panel says until it has a preview
     QAction *m_exportPdf = nullptr;
     QAction *m_exportHtml = nullptr;
 };

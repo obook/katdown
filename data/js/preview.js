@@ -4,6 +4,7 @@
 //   __setLabels(obj)         translated titles of the alerts and callouts
 //   __setMacros(tex)         math macros from the settings
 //   __setGithubOnly(on)      render only what GitHub renders
+//   __setRemoteMediaHint(text)   name of the setting that keeps web pictures out, "" when allowed
 //   __applyVars(obj)         set CSS custom properties on <html>
 //   __useHljsTheme(name)     enable one bundled hljs <style>, disable the rest
 //   __setCodeCss(css)        inject a generated hljs theme (Application mode)
@@ -139,13 +140,24 @@
     }
     var folds = foldStates(el);
     katemark.resetMath();
-    var fm = katemark.frontMatterTable(current);
+    var tableHtml = "";
+    var body = current;
+    var lineOffset = 0;
+    var frontMatter = katemark.frontMatterTable(current);
+    if (frontMatter) {
+      tableHtml = frontMatter.html;
+      body = frontMatter.body;
+      lineOffset = frontMatter.lines;
+    }
     if (githubOnly && !parsers.github) {
       parsers.github = buildParser(true);
     }
     var md = githubOnly ? parsers.github : parsers.all;
-    el.innerHTML = (fm ? fm.html : "") + md.render(fm ? fm.body : current, { lineOffset: fm ? fm.lines : 0 });
-    katemark.fillToc(el, !githubOnly);
+    el.innerHTML = tableHtml + md.render(body, { lineOffset: lineOffset });
+    katemark.assignHeadingIds(el);
+    if (!githubOnly) {
+      katemark.fillToc(el);
+    }
     katemark.drawMermaid(el);
     katemark.explainBlockedMedia(el);
     restoreFoldStates(el, folds);
@@ -154,10 +166,10 @@
   // The rendered article for an HTML export, cleaned on a copy: the page is left as is.
   window.__exportBody = function () {
     var copy = document.getElementById("content").cloneNode(true);
-    // Raw HTML of the source may hold scripts. They do not run in the preview, but they
-    // would in the exported file.
-    copy.querySelectorAll("script").forEach(function (script) {
-      script.remove();
+    // Raw HTML of the source may hold scripts, a <meta> that sends the reader elsewhere
+    // or a <base> that moves every link. None acts in the preview; all would in the file.
+    copy.querySelectorAll("script, meta, base").forEach(function (element) {
+      element.remove();
     });
     copy.querySelectorAll("*").forEach(function (element) {
       Array.prototype.slice.call(element.attributes).forEach(function (attribute) {
@@ -177,8 +189,9 @@
 
   // \newcommand lines from the settings, defined before every document.
   window.__setMacros = function (tex) {
-    katemark.setGlobalMacros(tex);
-    rerender();
+    if (katemark.setGlobalMacros(tex)) {
+      rerender();
+    }
   };
 
   // Name of the setting that blocks pictures from the web, or "" when they are allowed.
@@ -187,10 +200,14 @@
     rerender();
   };
 
+  // The host sends the setting after every change of any setting: only a real change
+  // is worth a render.
   window.__setGithubOnly = function (on) {
+    if (on === githubOnly) {
+      return;
+    }
     githubOnly = on;
-    document.body.classList.toggle("github-only", !!on); // base.css narrows it
-
+    document.body.classList.toggle("github-only", on); // base.css narrows it
     rerender();
   };
 
@@ -223,29 +240,38 @@
   };
 
   window.__useHljsTheme = function (name) {
-    var ids = ["hljs-gh", "hljs-ghd"];
-    var keep = name === "github-dark" ? "hljs-ghd" : name === "github" ? "hljs-gh" : null;
-    ids.forEach(function (id) {
-      var e = document.getElementById(id);
-      if (e) e.disabled = id !== keep;
+    var keep = null;
+    if (name === "github-dark") {
+      keep = "hljs-ghd";
+    } else if (name === "github") {
+      keep = "hljs-gh";
+    }
+    ["hljs-gh", "hljs-ghd"].forEach(function (id) {
+      var sheet = document.getElementById(id);
+      if (sheet) {
+        sheet.disabled = id !== keep;
+      }
     });
-    var gen = document.getElementById("hljs-generated");
-    if (gen) gen.textContent = ""; // bundled theme active, clear generated
+    var generated = document.getElementById("hljs-generated");
+    if (generated) {
+      generated.textContent = ""; // bundled theme active, clear generated
+    }
   };
 
   window.__setCodeCss = function (css) {
-    var ids = ["hljs-gh", "hljs-ghd"];
-    ids.forEach(function (id) {
-      var e = document.getElementById(id);
-      if (e) e.disabled = true; // generated theme takes over
+    ["hljs-gh", "hljs-ghd"].forEach(function (id) {
+      var sheet = document.getElementById(id);
+      if (sheet) {
+        sheet.disabled = true; // generated theme takes over
+      }
     });
-    var gen = document.getElementById("hljs-generated");
-    if (!gen) {
-      gen = document.createElement("style");
-      gen.id = "hljs-generated";
-      document.head.appendChild(gen);
+    var generated = document.getElementById("hljs-generated");
+    if (!generated) {
+      generated = document.createElement("style");
+      generated.id = "hljs-generated";
+      document.head.appendChild(generated);
     }
-    gen.textContent = css;
+    generated.textContent = css;
   };
 
   window.__setColorScheme = function (dark) {

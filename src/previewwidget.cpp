@@ -1,3 +1,8 @@
+// previewwidget.cpp
+// PreviewWidget: building the bar and the web view, attaching a document, rendering.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #include "previewwidget.h"
 #include "previewpage.h"
 #include "previewutil.h"
@@ -14,6 +19,7 @@
 #include <QToolTip>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QWebEngineNewWindowRequest>
 #include <QWebEngineProfile>
 #include <QWebEngineSettings>
 #include <QWebEngineView>
@@ -25,6 +31,11 @@
 
 namespace
 {
+// How long the text has to stay unchanged before the page renders it.
+constexpr int RenderDebounceMs = 150;
+
+constexpr int BarIconSizePx = 16;
+
 // Default titles of the alerts and callouts, in the user's language. The page has no
 // access to the translations, so it gets them from here.
 QJsonObject calloutLabels()
@@ -56,35 +67,62 @@ PreviewWidget::PreviewWidget(KTextEditor::MainWindow *mainWindow, KTextEditor::V
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
+    createBar();
+    layout->addWidget(m_bar);
+    createWebView();
+    layout->addWidget(m_web);
 
-    // The bar above the preview: what the page renders on the left, the exports on the
-    // right once the window hands them over.
+    m_debounce = new QTimer(this);
+    m_debounce->setSingleShot(true);
+    m_debounce->setInterval(RenderDebounceMs);
+    connect(m_debounce, &QTimer::timeout, this, &PreviewWidget::render);
+
+    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyTheme);
+    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyMediaPolicy);
+    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyMacros);
+    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applySyntax);
+
+    setWindowIcon(QIcon::fromTheme(QStringLiteral("text-markdown")));
+    applyMediaPolicy();
+    attachDocument(doc, view);
+}
+
+// The bar above the preview: what the page renders on the left, the exports on the right
+// once the window hands them over.
+void PreviewWidget::createBar()
+{
     m_bar = new QToolBar(this);
-    m_bar->setIconSize(QSize(16, 16));
+    m_bar->setIconSize(QSize(BarIconSizePx, BarIconSizePx));
     m_bar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    // A check box rather than a button: a flat button that is off reads as a mere label.
-    m_githubOnly = new QCheckBox(i18n("GitHub only"), m_bar);
-    m_githubOnly->setToolTip(i18n("Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs syntax"));
-    m_githubOnly->setChecked(Settings::self()->githubOnly());
-    connect(m_githubOnly, &QCheckBox::toggled, Settings::self(), &Settings::setGithubOnly);
-    m_bar->addWidget(m_githubOnly);
+    // A check box: a flat button that is off reads as a mere label.
+    m_githubOnlyBox = new QCheckBox(i18n("GitHub only"), m_bar);
+    m_githubOnlyBox->setToolTip(i18n("Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs syntax"));
+    m_githubOnlyBox->setChecked(Settings::self()->githubOnly());
+    connect(m_githubOnlyBox, &QCheckBox::toggled, Settings::self(), &Settings::setGithubOnly);
+    m_bar->addWidget(m_githubOnlyBox);
     auto *spacer = new QWidget(m_bar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_bar->addWidget(spacer);
-    layout->addWidget(m_bar);
+}
 
-    // Each preview owns an off-the-record profile carrying its own guard so multiple
-    // open previews each confine to their own document folder.
-    auto *guard = new LocalFileGuard(this);
-    m_guard = guard;
+void PreviewWidget::createWebView()
+{
+    // Each preview has its own off-the-record profile and guard, so it stays inside its
+    // own document folder.
+    m_guard = new LocalFileGuard(this);
     m_profile = new QWebEngineProfile(this);
-    m_profile->setUrlRequestInterceptor(guard);
+    m_profile->setUrlRequestInterceptor(m_guard);
 
     m_web = new QWebEngineView(this);
     auto *page = new PreviewPage(m_profile, m_web);
     page->onLinkActivated = [this](const QUrl &url) {
         openLink(url);
     };
+    // A link that asks for a window of its own (target="_blank", a middle click) opens
+    // like any other.
+    connect(page, &QWebEnginePage::newWindowRequested, this, [this](QWebEngineNewWindowRequest &request) {
+        openLink(request.requestedUrl());
+    });
     // Where a link goes, shown while the pointer is on it. Leaving the link sends an
     // empty address, which hides the tip.
     connect(page, &QWebEnginePage::linkHovered, this, [this](const QString &address) {
@@ -96,46 +134,40 @@ PreviewWidget::PreviewWidget(KTextEditor::MainWindow *mainWindow, KTextEditor::V
     connect(m_web, &QWidget::customContextMenuRequested, this, &PreviewWidget::showContextMenu);
     connect(page, &QWebEnginePage::scrollPositionChanged, this, &PreviewWidget::syncFromPreview);
     connect(page, &QWebEnginePage::pdfPrintingFinished, this, [this](const QString &path, bool ok) {
-        applyTheme();
-        Q_EMIT exported(path, ok);
+        if (path == m_exportPath) {
+            endExport(ok);
+        }
+    });
+    // A page whose process died answers nothing more: an export would wait for ever.
+    connect(page, &QWebEnginePage::renderProcessTerminated, this, [this]() {
+        m_loaded = false;
+        endExport(false);
     });
     m_web->settings()->setAttribute(QWebEngineSettings::FocusOnNavigationEnabled, false);
     m_web->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
-    // Watch the view for the lazily-created render widget so we can attach to it (below).
+    // Watch the view for the lazily-created render widget so we can attach to it.
     m_web->installEventFilter(this);
     installInputFilter();
-    layout->addWidget(m_web);
+    connect(m_web, &QWebEngineView::loadFinished, this, &PreviewWidget::onLoadFinished);
+}
 
-    m_debounce = new QTimer(this);
-    m_debounce->setSingleShot(true);
-    m_debounce->setInterval(150);
-    connect(m_debounce, &QTimer::timeout, this, &PreviewWidget::render);
-
-    connect(m_web, &QWebEngineView::loadFinished, this, [this](bool ok) {
-        if (!ok) {
-            return;
-        }
-        m_loaded = true;
-        installInputFilter();
-        runJs(QStringLiteral("window.__setLabels(%1);").arg(compactJson(calloutLabels())));
-        // While pictures from the web are kept out, the page names the setting that
-        // lets them in, in place of each one. A change of that setting reloads the page.
-        const QString mediaHint = Settings::self()->loadRemoteMedia() ? QString() : i18n("Load media previews from remote URLs");
-        runJs(QStringLiteral("window.__setRemoteMediaHint(%1);").arg(jsLiteral(mediaHint)));
-        applyTheme();
-        applyMacros();
-        applySyntax();
-        render();
-    });
-
-    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyTheme);
-    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyMediaPolicy);
-    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applyMacros);
-    connect(Settings::self(), &Settings::changed, this, &PreviewWidget::applySyntax);
-
-    setWindowIcon(QIcon::fromTheme(QStringLiteral("text-markdown")));
-    applyMediaPolicy();
-    attachDocument(doc, view);
+void PreviewWidget::onLoadFinished(bool ok)
+{
+    if (!ok) {
+        return;
+    }
+    m_loaded = true;
+    installInputFilter();
+    runJs(QStringLiteral("window.__setLabels(%1);").arg(compactJson(calloutLabels())));
+    // While pictures from the web are kept out, the page names the setting that lets them
+    // in, in place of each one: the same text as on the settings page (configpage.cpp).
+    // A change of that setting reloads the page.
+    const QString mediaHint = Settings::self()->loadRemoteMedia() ? QString() : i18n("Load media previews from remote URLs");
+    runJs(QStringLiteral("window.__setRemoteMediaHint(%1);").arg(jsLiteral(mediaHint)));
+    applyTheme();
+    applyMacros();
+    applySyntax();
+    render();
 }
 
 void PreviewWidget::attachDocument(KTextEditor::Document *doc, KTextEditor::View *view)
@@ -176,10 +208,8 @@ void PreviewWidget::snapshotSource()
     }
 }
 
-// Teardown order matters: the view (and its page) must die before the profile, and the
-// profile before the guard it references. m_web is parented to this and the QObject child
-// list destroys in reverse order of construction (web after profile after guard), which
-// gives exactly that sequence; spelling it out keeps the invariant from drifting.
+// Delete in this order: the view and its page, then the profile, then the guard the
+// profile uses. Qt promises no order for deleting children, so it is done by hand.
 PreviewWidget::~PreviewWidget()
 {
     delete m_web;
@@ -218,18 +248,18 @@ void PreviewWidget::render()
     syncFromEditor();
 }
 
-// Hand the page the math macros of the settings; it renders again with them.
+// Hand the page the math macros of the settings; it renders again when they changed.
 void PreviewWidget::applyMacros()
 {
     runJs(QStringLiteral("window.__setMacros(%1);").arg(jsLiteral(Settings::self()->mathMacros())));
 }
 
-// Tell the page which syntax to read, and keep the button in step with a change made
+// Tell the page which syntax to read, and keep the check box in step with a change made
 // from the bar of another window.
 void PreviewWidget::applySyntax()
 {
     const bool githubOnly = Settings::self()->githubOnly();
-    m_githubOnly->setChecked(githubOnly);
+    m_githubOnlyBox->setChecked(githubOnly);
     runJs(QStringLiteral("window.__setGithubOnly(%1);").arg(githubOnly ? QStringLiteral("true") : QStringLiteral("false")));
 }
 

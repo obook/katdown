@@ -1,3 +1,8 @@
+// plugin.cpp
+// KatemarkPlugin: the object Kate loads, which makes a view per window and the settings page.
+// Code by uwuclxdy.
+// License: GPL-3.0-or-later
+
 #include "plugin.h"
 #include "configpage.h"
 #include "pluginview.h"

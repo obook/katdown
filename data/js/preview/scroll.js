@@ -13,8 +13,8 @@
 
   // markdown-it plugin: tag every block with the span of source lines it comes from.
   function sourceLines(md) {
-    // Source line span of each block, for scroll sync with the editor. The front matter
-    // is cut off before parsing, so its line count comes back in through the env.
+    // The front matter is cut off before parsing, so its line count comes back in through
+    // the env.
     md.core.ruler.push("source-lines", function (state) {
       var offset = (state.env && state.env.lineOffset) || 0;
       state.tokens.forEach(function (token) {
@@ -32,9 +32,8 @@
     };
   }
 
-  // Scroll sync with the editor: blocks carry their source line span, so a source line
-  // maps to a height in the page and back. Footnotes are left out, they render at the
-  // end of the page whatever line they were written on.
+  // Footnotes are left out: they render at the end of the page whatever line they were
+  // written on.
   var BLOCKS = "#content [data-line]:not(.footnotes *)";
 
   // Distance between two probes when looking for the block at the top of the viewport.

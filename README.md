@@ -42,7 +42,7 @@ tab of its own.
 | GitHub only | A check box above the preview leaves out what GitHub would not render | fork |
 | Math | LaTeX formulas, rendered by KaTeX | fork |
 | Diagrams | Mermaid | fork |
-| Export | A PDF or a single self-contained HTML file | fork |
+| Export | A PDF with numbered pages (Qt 6.10 or later), or a single self-contained HTML file | fork |
 | Editing actions | Bold, italic, strikethrough, heading level, paste as link, table formatting | fork |
 | Image paste | Saves a picture from the clipboard beside the document and links it | fork |
 | Languages | 44 interface languages | fork |
@@ -138,7 +138,9 @@ The documents in [`examples/`](examples) show what the preview renders:
 - The preview follows the active Markdown document. When the active document
   is not Markdown, it keeps its last content.
 - Both exports use GitHub's light colors, whatever the preview shows. The
-  HTML file embeds the pictures stored on your computer and holds no script.
+  HTML file embeds the pictures of the document's folder and holds no script.
+- Raw HTML in a document is shown, but its scripts, frames and forms are
+  not run.
 - Katemark saves a pasted picture as `image-<date>-<time>.png` in the folder
   of the document, so save the document first. It inserts the link
   `![](image-<date>-<time>.png)` and leaves the cursor between the brackets.
@@ -190,6 +192,11 @@ Tools > Markdown holds these actions. They work in Markdown documents only.
 bookmark and indentation shortcuts. To change any shortcut: Settings >
 Configure Keyboard Shortcuts, search for Katemark.
 
+On Windows the <kbd>Ctrl</kbd>+<kbd>Alt</kbd> shortcuts are not set: Windows
+sends <kbd>AltGr</kbd> as <kbd>Ctrl</kbd>+<kbd>Alt</kbd>, so they would take
+the euro sign or the `|` of a table. Give the actions a key of your own in
+the same dialog.
+
 ## Settings
 
 Settings > Configure Kate, then the **Katemark** page. It appears once you
@@ -222,16 +229,17 @@ Install the build dependencies:
 # KDE neon
 sudo apt install g++ cmake extra-cmake-modules gettext dpkg-dev qt6-webengine-dev \
     kf6-ktexteditor-dev kf6-kcoreaddons-dev kf6-ki18n-dev kf6-kconfig-dev \
-    kf6-kxmlgui-dev kf6-syntax-highlighting-dev
+    kf6-kxmlgui-dev kf6-kwidgetsaddons-dev kf6-syntax-highlighting-dev
 
 # Ubuntu 26.04
 sudo apt install g++ cmake extra-cmake-modules gettext dpkg-dev qt6-webengine-dev \
     libkf6texteditor-dev libkf6coreaddons-dev libkf6i18n-dev libkf6config-dev \
-    libkf6xmlgui-dev libkf6syntaxhighlighting-dev
+    libkf6xmlgui-dev libkf6widgetsaddons-dev libkf6syntaxhighlighting-dev
 
 # Arch Linux
 sudo pacman -S --needed base-devel cmake extra-cmake-modules \
-    ktexteditor qt6-webengine kcoreaddons ki18n kconfig kxmlgui syntax-highlighting
+    ktexteditor qt6-webengine kcoreaddons ki18n kconfig kxmlgui kwidgetsaddons \
+    syntax-highlighting
 ```
 
 Get the sources:
@@ -304,10 +312,10 @@ Author of this fork: Olivier Booklage (<olivier.booklage@ac-bordeaux.fr>).
 Original project: [Katdown](https://github.com/uwuclxdy/katdown) by uwuclxdy
 (GPL-3.0-or-later).
 
-The Arch Linux package is maintained by Matija Šuklje.
+Matija Šuklje maintains the Arch Linux package.
 
-The openSUSE package, submitted to `KDE:Extra`, is maintained by Olivier
-Belleux (Wolfheri).
+Olivier Belleux (Wolfheri) maintains the openSUSE package, submitted to
+`KDE:Extra`.
 
 Bundled libraries:
 

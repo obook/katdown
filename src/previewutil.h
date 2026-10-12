@@ -1,6 +1,6 @@
 // previewutil.h
 // Small helpers shared by the source files of the preview.
-// Code by uwuclxdy, moved out of previewwidget.cpp.
+// Code by uwuclxdy and Olivier Booklage.
 // License: GPL-3.0-or-later
 
 #pragma once
@@ -21,12 +21,6 @@ inline QString readAsset(const QString &path)
         return QString();
     }
     return QString::fromUtf8(f.readAll());
-}
-
-// Make an arbitrary string safe to inline inside a <script> block.
-inline QString shieldScript(QString js)
-{
-    return js.replace(QLatin1String("</script"), QLatin1String("<\\/script"), Qt::CaseInsensitive);
 }
 
 // Encode a string as a JavaScript string literal (incl. surrounding quotes).

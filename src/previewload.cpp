@@ -23,10 +23,6 @@ QString PreviewWidget::buildHtml()
     html.replace(QLatin1String("/*__BASE_CSS__*/"), readAsset(base + QStringLiteral("css/base.css")));
     html.replace(QLatin1String("/*__HLJS_LIGHT__*/"), readAsset(base + QStringLiteral("css/hljs-github.min.css")));
     html.replace(QLatin1String("/*__HLJS_DARK__*/"), readAsset(base + QStringLiteral("css/hljs-github-dark.min.css")));
-    html.replace(QLatin1String("/*__MARKDOWN_IT__*/"), shieldScript(readAsset(base + QStringLiteral("js/markdown-it.min.js"))));
-    html.replace(QLatin1String("/*__HLJS_JS__*/"), shieldScript(readAsset(base + QStringLiteral("js/highlight.min.js"))));
-    html.replace(QLatin1String("/*__JS_YAML__*/"), shieldScript(readAsset(base + QStringLiteral("js/js-yaml.min.js"))));
-    html.replace(QLatin1String("/*__PREVIEW_JS__*/"), shieldScript(readAsset(base + QStringLiteral("js/preview.js"))));
     return html;
 }
 
@@ -44,8 +40,9 @@ void PreviewWidget::loadPage()
         m_url = m_doc->url();
     }
     const QString root = m_url.isLocalFile() ? QFileInfo(m_url.toLocalFile()).absolutePath() : QString();
-    static_cast<LocalFileGuard *>(m_guard)->setRoot(root);
+    m_guard->setRoot(root);
     m_loaded = false;
+    endExport(false); // an export cannot finish on a page that goes away
     m_web->setHtml(buildHtml(), baseUrl());
 }
 
@@ -65,9 +62,9 @@ void PreviewWidget::applyMediaPolicy()
 {
     const bool remote = Settings::self()->loadRemoteMedia();
     m_web->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, remote);
-    static_cast<LocalFileGuard *>(m_guard)->setAllowRemote(remote);
-    if (m_loaded && remote != m_remoteApplied) {
+    m_guard->setAllowRemote(remote);
+    if (m_loaded && remote != m_pageAllowsRemoteMedia) {
         loadPage();
     }
-    m_remoteApplied = remote;
+    m_pageAllowsRemoteMedia = remote;
 }

@@ -16,6 +16,9 @@ class Theme;
 // True when the application's palette is a dark one.
 bool paletteIsDark();
 
+// True when the settings ask for GitHub's dark palette, or leave it to a dark application.
+bool githubLookIsDark();
+
 // GitHub's own CSS variables, for its light or its dark palette.
 QJsonObject githubVars(bool dark);
 

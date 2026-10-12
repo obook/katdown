@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-03 20:12+0200\n"
+"POT-Creation-Date: 2026-10-12 21:07+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Lithuanian\n"
@@ -14,42 +14,42 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/configpage.cpp:58
+#: src/configpage.cpp:74
 #, kde-format
 msgid "GitHub"
 msgstr "GitHub"
 
-#: src/configpage.cpp:59
+#: src/configpage.cpp:75
 #, kde-format
 msgid "Match editor / system theme"
 msgstr "Derinti prie redaktoriaus / sistemos apipavidalinimo"
 
-#: src/configpage.cpp:60
+#: src/configpage.cpp:76
 #, kde-format
 msgid "Style:"
 msgstr "Stilius:"
 
-#: src/configpage.cpp:63
+#: src/configpage.cpp:79
 #, kde-format
 msgid "Follow system (auto)"
 msgstr "Pagal sistemą (automatiškai)"
 
-#: src/configpage.cpp:64
+#: src/configpage.cpp:80
 #, kde-format
 msgid "Light"
 msgstr "Šviesus"
 
-#: src/configpage.cpp:65
+#: src/configpage.cpp:81
 #, kde-format
 msgid "Dark"
 msgstr "Tamsus"
 
-#: src/configpage.cpp:66
+#: src/configpage.cpp:82
 #, kde-format
 msgid "GitHub variant:"
 msgstr "GitHub variantas:"
 
-#: src/configpage.cpp:69
+#: src/configpage.cpp:85
 #, kde-format
 msgid ""
 "\"GitHub\" uses GitHub's own colors. \"Match editor / system theme\" "
@@ -60,12 +60,12 @@ msgstr ""
 "sistemos apipavidalinimo\" perspalvina tą patį išdėstymą pagal aktyvų "
 "redaktoriaus apipavidalinimą, kad peržiūra derėtų su likusia Kate dalimi."
 
-#: src/configpage.cpp:76 src/previewwidget.cpp:113
+#: src/configpage.cpp:97 src/previewwidget.cpp:165
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Įkelti mediją iš nuotolinių URL adresų"
 
-#: src/configpage.cpp:79
+#: src/configpage.cpp:100
 #, kde-format
 msgid ""
 "Off by default so the preview stays fully offline. Enable to let images load "
@@ -74,12 +74,12 @@ msgstr ""
 "Pagal numatymą išjungta, kad peržiūra veiktų visiškai be interneto ryšio. "
 "Įjunkite, kad paveikslai būtų įkeliami per http(s)."
 
-#: src/configpage.cpp:84
+#: src/configpage.cpp:105
 #, kde-format
 msgid "Math macros:"
 msgstr "Matematikos makrokomandos:"
 
-#: src/configpage.cpp:91
+#: src/configpage.cpp:111
 #, kde-format
 msgid ""
 "The \\newcommand lines written here are available in the formulas of every "
@@ -87,44 +87,44 @@ msgid ""
 msgstr ""
 "Čia parašytos \\newcommand eilutės yra prieinamos visų dokumentų formulėse."
 
-#: src/configpage.cpp:99
+#: src/configpage.cpp:123
 #, kde-format
 msgid "Check for updates"
 msgstr "Tikrinti, ar yra atnaujinimų"
 
-#: src/configpage.cpp:102
+#: src/configpage.cpp:126
 #, kde-format
 msgid "Installed version: %1"
 msgstr "Įdiegta versija: %1"
 
-#: src/configpage.cpp:129 src/configpage.cpp:134 src/pluginview.cpp:49
+#: src/configpage.cpp:136 src/configpage.cpp:141 src/pluginview.cpp:49
 #, kde-format
 msgid "Katemark"
 msgstr "Katemark"
 
-#: src/configpage.cpp:151
+#: src/configpage.cpp:158
 #, kde-format
 msgid "Checking..."
 msgstr "Tikrinama..."
 
-#: src/configpage.cpp:164
+#: src/configpage.cpp:171
 #, kde-format
 msgid "Update check failed: %1"
 msgstr "Nepavyko patikrinti, ar yra atnaujinimų: %1"
 
-#: src/configpage.cpp:171
+#: src/configpage.cpp:178
 #, kde-format
 msgid "Update check failed: no published release found."
 msgstr ""
 "Nepavyko patikrinti, ar yra atnaujinimų: nerasta jokios paskelbtos laidos."
 
-#: src/configpage.cpp:181
+#: src/configpage.cpp:189
 #, kde-format
 msgid "Update available: %1 (installed %2). <a href=\"%3\">Release notes</a>"
 msgstr ""
 "Yra atnaujinimas: %1 (įdiegta %2). <a href=\"%3\">Laidos informacija</a>"
 
-#: src/configpage.cpp:183
+#: src/configpage.cpp:191
 #, kde-format
 msgid "Up to date (installed %1)."
 msgstr "Naudojama naujausia versija (įdiegta %1)."
@@ -146,194 +146,203 @@ msgstr "Nepavyko įrašyti paveikslo į %1"
 msgid "Markdown Preview"
 msgstr "Markdown peržiūra"
 
-#: src/pluginview.cpp:56
+#: src/pluginview.cpp:57
+#, kde-format
+msgid ""
+"No Markdown document yet. Save this one as .md, or set its mode to Markdown."
+msgstr ""
+"Markdown dokumento dar nėra. Įrašykite šį kaip .md arba nustatykite jo "
+"veikseną į Markdown."
+
+#: src/pluginview.cpp:63
 #, kde-format
 msgid "Preview"
 msgstr "Peržiūra"
 
-#: src/pluginview.cpp:57
+#: src/pluginview.cpp:64
 #, kde-format
 msgid "Show or hide the Markdown preview beside the editor"
 msgstr "Rodyti arba slėpti Markdown peržiūrą šalia redaktoriaus"
 
-#: src/pluginview.cpp:62
+#: src/pluginview.cpp:68
 #, kde-format
 msgid "Export Preview as PDF..."
 msgstr "Eksportuoti peržiūrą kaip PDF..."
 
-#: src/pluginview.cpp:66
+#: src/pluginview.cpp:74
 #, kde-format
 msgid "Export Preview as HTML..."
 msgstr "Eksportuoti peržiūrą kaip HTML..."
 
-#: src/pluginview.cpp:150
+#: src/pluginview.cpp:166
 #, kde-format
 msgid "Untitled"
 msgstr "Be pavadinimo"
 
-#: src/pluginview.cpp:156
+#: src/pluginview.cpp:172
 #, kde-format
 msgid "Export as PDF"
 msgstr "Eksportuoti kaip PDF"
 
-#: src/pluginview.cpp:156
+#: src/pluginview.cpp:172
 #, kde-format
 msgid "Export as HTML"
 msgstr "Eksportuoti kaip HTML"
 
-#: src/pluginview.cpp:158
+#: src/pluginview.cpp:174
 #, kde-format
 msgid "PDF files (*.pdf)"
 msgstr "PDF failai (*.pdf)"
 
-#: src/pluginview.cpp:158
+#: src/pluginview.cpp:174
 #, kde-format
 msgid "HTML files (*.html)"
 msgstr "HTML failai (*.html)"
 
-#: src/pluginview.cpp:171
+#: src/pluginview.cpp:190
 #, kde-format
 msgid "Preview exported to %1"
 msgstr "Peržiūra eksportuota į %1"
 
-#: src/pluginview.cpp:171
+#: src/pluginview.cpp:192
 #, kde-format
 msgid "Could not export the preview to %1"
 msgstr "Nepavyko eksportuoti peržiūros į %1"
 
-#: src/pluginviewedit.cpp:82
+#: src/pluginviewedit.cpp:107
 #, kde-format
 msgid "Bold"
 msgstr "Pusjuodis"
 
-#: src/pluginviewedit.cpp:85
+#: src/pluginviewedit.cpp:114
 #, kde-format
 msgid "Italic"
 msgstr "Kursyvas"
 
-#: src/pluginviewedit.cpp:89
+#: src/pluginviewedit.cpp:121
 #, kde-format
 msgid "Strikethrough"
 msgstr "Perbrauktas"
 
-#: src/pluginviewedit.cpp:96
+#: src/pluginviewedit.cpp:128
 #, kde-format
 msgid "Increase Heading Level"
 msgstr "Didinti antraštės lygį"
 
-#: src/pluginviewedit.cpp:103
+#: src/pluginviewedit.cpp:135
 #, kde-format
 msgid "Decrease Heading Level"
 msgstr "Mažinti antraštės lygį"
 
-#: src/pluginviewedit.cpp:109
+#: src/pluginviewedit.cpp:142
 #, kde-format
 msgid "Paste as Link"
 msgstr "Įdėti kaip nuorodą"
 
-#: src/pluginviewedit.cpp:112
+#: src/pluginviewedit.cpp:149
 #, kde-format
 msgid "Format Table"
 msgstr "Formatuoti lentelę"
 
-#: src/previewwidget.cpp:30
+#: src/previewwidget.cpp:44
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "Pastaba"
 
-#: src/previewwidget.cpp:31
+#: src/previewwidget.cpp:45
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "Patarimas"
 
-#: src/previewwidget.cpp:32
+#: src/previewwidget.cpp:46
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "Svarbu"
 
-#: src/previewwidget.cpp:33
+#: src/previewwidget.cpp:47
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "Įspėjimas"
 
-#: src/previewwidget.cpp:34
+#: src/previewwidget.cpp:48
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "Atsargiai"
 
-#: src/previewwidget.cpp:35
+#: src/previewwidget.cpp:49
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "Santrauka"
 
-#: src/previewwidget.cpp:36
+#: src/previewwidget.cpp:50
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "Informacija"
 
-#: src/previewwidget.cpp:37
+#: src/previewwidget.cpp:51
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "Užduotis"
 
-#: src/previewwidget.cpp:38
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "Pavyko"
 
-#: src/previewwidget.cpp:39
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "Klausimas"
 
-#: src/previewwidget.cpp:40
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "Nepavyko"
 
-#: src/previewwidget.cpp:41
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "Pavojus"
 
-#: src/previewwidget.cpp:42
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "Klaida"
 
-#: src/previewwidget.cpp:43
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "Pavyzdys"
 
-#: src/previewwidget.cpp:44
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Citata"
 
-#: src/previewwidget.cpp:61
+#: src/previewwidget.cpp:98
 #, kde-format
 msgid "GitHub only"
 msgstr "Tik GitHub"
 
-#: src/previewwidget.cpp:63
+#: src/previewwidget.cpp:99
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
 "syntax"
-msgstr "Rodyti tik tai, ką rodo GitHub, be CodiMD, Obsidian ir MkDocs sintaksės"
+msgstr ""
+"Rodyti tik tai, ką rodo GitHub, be CodiMD, Obsidian ir MkDocs sintaksės"

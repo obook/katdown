@@ -1,3 +1,8 @@
+// configpage.h
+// ConfigPage: the page of the plugin in Kate's configuration dialog.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #pragma once
 
 #include <KTextEditor/ConfigPage>
@@ -8,10 +13,11 @@ class QLabel;
 class QPlainTextEdit;
 class QPushButton;
 class QNetworkAccessManager;
+class QVBoxLayout;
 
 /**
- * Settings page shown under Kate's plugin configuration: choose between GitHub
- * colors and the active editor/system theme, plus the GitHub light/dark variant.
+ * Settings page shown under Kate's plugin configuration: the colors of the preview,
+ * pictures from the web, the math macros and the check for a newer version.
  */
 class ConfigPage : public KTextEditor::ConfigPage
 {
@@ -28,10 +34,13 @@ public:
     void defaults() override;
 
 private:
+    void addColorSettings(QVBoxLayout *layout);
+    void addContentSettings(QVBoxLayout *layout);
+    void addUpdateCheck(QVBoxLayout *layout);
     void syncEnabled();
     void checkForUpdates();
 
-    QComboBox *m_mode = nullptr;
+    QComboBox *m_colorSource = nullptr;
     QComboBox *m_variant = nullptr;
     QCheckBox *m_remoteMedia = nullptr;
     QPlainTextEdit *m_macros = nullptr;

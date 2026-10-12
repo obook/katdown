@@ -77,11 +77,10 @@
   // "+" (expanded).
   function callouts(md, options) {
     // "[!type]", then "-" or "+" when the callout folds, then the title if there is one.
-    var MARKER = /^\[!([\w-]+)\]([+-]?)(?:[ \t]+|$)/;
-    if (options && options.githubOnly) {
-      // GitHub knows five types, alone on their line: no folding and no title.
-      MARKER = /^\[!(note|tip|important|warning|caution)\]()[ \t]*$/i;
-    }
+    var OBSIDIAN_MARKER = /^\[!([\w-]+)\]([+-]?)(?:[ \t]+|$)/;
+    // GitHub knows five types, alone on their line: no folding and no title.
+    var GITHUB_MARKER = /^\[!(note|tip|important|warning|caution)\]()[ \t]*$/i;
+    var markerPattern = options && options.githubOnly ? GITHUB_MARKER : OBSIDIAN_MARKER;
 
     // Read the marker that opens the blockquote starting at tokens[i] and remove it from
     // the text. Returns null when the blockquote is an ordinary quote.
@@ -95,7 +94,7 @@
       if (!firstChild || firstChild.type !== "text") {
         return null;
       }
-      var match = MARKER.exec(firstChild.content);
+      var match = markerPattern.exec(firstChild.content);
       if (!match) {
         return null;
       }

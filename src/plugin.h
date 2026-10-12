@@ -1,3 +1,8 @@
+// plugin.h
+// KatemarkPlugin: the object Kate loads.
+// Code by uwuclxdy.
+// License: GPL-3.0-or-later
+
 #pragma once
 
 #include <KTextEditor/Plugin>

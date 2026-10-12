@@ -5,35 +5,11 @@ Issues and PRs are welcome. File an issue through the
 PR against the default branch. PR titles follow
 [Conventional Commits](https://www.conventionalcommits.org): `type(scope): summary`.
 
-## AI and agent contributions
+## AI contributions
 
-AI-assisted work is welcome. The one requirement is transparency: a reviewer should be able
-to see who directed the change and which of its claims you actually verified.
-
-### Human contributors
-
-Any amount of AI help is fine. Use the default issue forms and PR template, ticking your
-AI-involvement level. You reviewed every line; the diff is yours.
-
-### Autonomous agents
-
-If you file on an operator's behalf, use the dedicated formats. They keep your authorship
-legible instead of disguised as a person's.
-
-- Issues: the `(agent)` variant of your issue type in the [chooser](https://github.com/obook/katemark/issues/new/choose)
-  (e.g. Bug report (agent)).
-- PRs: the agent format at `.github/PULL_REQUEST_TEMPLATE/agent.md`. Append `?template=agent.md`
-  to the compare URL to load it.
-
-Whichever you use:
-
-- Write as yourself, first person. Don't imitate the maintainer's voice or pass the change
-  off as a person's.
-- Open with the operator's ask, close to verbatim. Follow it with your own account of the work.
-- Say what you ran and what it returned. Keep that separate from what your operator verified.
-  Flag anything you couldn't check.
-- Prefer understatement. The reviewer will test your claims.
-- Name your tool and model, plus the operator's handle. Redact tokens and credentials.
+AI-assisted work is welcome. Say who directed the change and which of its claims you verified.
+Use the issue forms and the PR template, and tick your AI-involvement level. You answer for
+the whole diff.
 
 ## Building and running
 
@@ -97,15 +73,20 @@ zip.
 | `src/configpage.*` | The settings page |
 | `src/settings.*` | Persisted settings |
 | `data/js/preview.js` | The page's rendering and the functions the plugin calls |
-| `data/js/preview/` | One file per concern: callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, front matter, blocked pictures |
+| `data/js/preview/` | One file per concern: GitHub task lists and front matter, callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, blocked pictures |
 | `data/` | The other bundled HTML, CSS, JS and the qrc |
-| `tests/` | Four test programs; the three that need a preview share `testhelpers.h` |
+| `tests/` | Five test programs; the four that need a preview share `testhelpers.h` |
+
+A comment that starts with `ponytail:` marks a shortcut taken on purpose: it names the limit
+and what to do when that limit is reached.
 
 ## How it works
 
 The preview is a `QWebEngineView` inside a tool view created through
 `KTextEditor::MainWindow::createToolView`. The page is one HTML document whose assets are
-inlined or loaded from the plugin's own resources, so nothing loads over the network.
+inlined or loaded from the plugin's own resources, so nothing loads over the network. Its
+content security policy lets only the plugin's scripts run: a document's raw HTML is shown,
+its scripts are not.
 
 ```mermaid
 flowchart LR
@@ -119,7 +100,7 @@ flowchart LR
 
 - Layout and typography come from `github-markdown-css`. Its color values are stripped out so
   that the plugin drives them from CSS custom properties.
-- Markdown is parsed by [markdown-it](https://github.com/markdown-it/markdown-it). Bundled
+- [markdown-it](https://github.com/markdown-it/markdown-it) parses the Markdown. Bundled
   plugins add task-list checkboxes and GitHub alerts, and a leading YAML front matter is parsed
   with [js-yaml](https://github.com/nodeca/js-yaml) into a metadata table.
 - Code highlighting uses [highlight.js](https://github.com/highlightjs/highlight.js). In GitHub

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-03 20:12+0200\n"
+"POT-Creation-Date: 2026-10-12 21:07+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: French\n"
@@ -14,42 +14,42 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/configpage.cpp:58
+#: src/configpage.cpp:74
 #, kde-format
 msgid "GitHub"
 msgstr "GitHub"
 
-#: src/configpage.cpp:59
+#: src/configpage.cpp:75
 #, kde-format
 msgid "Match editor / system theme"
 msgstr "Suivre le thème de l'éditeur / du système"
 
-#: src/configpage.cpp:60
+#: src/configpage.cpp:76
 #, kde-format
 msgid "Style:"
 msgstr "Style :"
 
-#: src/configpage.cpp:63
+#: src/configpage.cpp:79
 #, kde-format
 msgid "Follow system (auto)"
 msgstr "Suivre le système (auto)"
 
-#: src/configpage.cpp:64
+#: src/configpage.cpp:80
 #, kde-format
 msgid "Light"
 msgstr "Clair"
 
-#: src/configpage.cpp:65
+#: src/configpage.cpp:81
 #, kde-format
 msgid "Dark"
 msgstr "Sombre"
 
-#: src/configpage.cpp:66
+#: src/configpage.cpp:82
 #, kde-format
 msgid "GitHub variant:"
 msgstr "Variante GitHub :"
 
-#: src/configpage.cpp:69
+#: src/configpage.cpp:85
 #, kde-format
 msgid ""
 "\"GitHub\" uses GitHub's own colors. \"Match editor / system theme\" "
@@ -60,12 +60,12 @@ msgstr ""
 "du système\" reprend la même mise en page avec les couleurs du thème actif "
 "de l'éditeur, de sorte que l'aperçu s'accorde avec le reste de Kate."
 
-#: src/configpage.cpp:76 src/previewwidget.cpp:113
+#: src/configpage.cpp:97 src/previewwidget.cpp:165
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Charger les médias depuis des URL distantes"
 
-#: src/configpage.cpp:79
+#: src/configpage.cpp:100
 #, kde-format
 msgid ""
 "Off by default so the preview stays fully offline. Enable to let images load "
@@ -74,12 +74,12 @@ msgstr ""
 "Désactivé par défaut pour que l'aperçu reste entièrement hors ligne. Activez "
 "cette option pour autoriser le chargement des images en http(s)."
 
-#: src/configpage.cpp:84
+#: src/configpage.cpp:105
 #, kde-format
 msgid "Math macros:"
 msgstr "Macros mathématiques :"
 
-#: src/configpage.cpp:91
+#: src/configpage.cpp:111
 #, kde-format
 msgid ""
 "The \\newcommand lines written here are available in the formulas of every "
@@ -88,44 +88,44 @@ msgstr ""
 "Les lignes \\newcommand écrites ici sont disponibles dans les formules de "
 "tous les documents."
 
-#: src/configpage.cpp:99
+#: src/configpage.cpp:123
 #, kde-format
 msgid "Check for updates"
 msgstr "Rechercher les mises à jour"
 
-#: src/configpage.cpp:102
+#: src/configpage.cpp:126
 #, kde-format
 msgid "Installed version: %1"
 msgstr "Version installée : %1"
 
-#: src/configpage.cpp:129 src/configpage.cpp:134 src/pluginview.cpp:49
+#: src/configpage.cpp:136 src/configpage.cpp:141 src/pluginview.cpp:49
 #, kde-format
 msgid "Katemark"
 msgstr "Katemark"
 
-#: src/configpage.cpp:151
+#: src/configpage.cpp:158
 #, kde-format
 msgid "Checking..."
 msgstr "Vérification..."
 
-#: src/configpage.cpp:164
+#: src/configpage.cpp:171
 #, kde-format
 msgid "Update check failed: %1"
 msgstr "Échec de la recherche de mise à jour : %1"
 
-#: src/configpage.cpp:171
+#: src/configpage.cpp:178
 #, kde-format
 msgid "Update check failed: no published release found."
 msgstr "Échec de la recherche de mise à jour : aucune version publiée trouvée."
 
-#: src/configpage.cpp:181
+#: src/configpage.cpp:189
 #, kde-format
 msgid "Update available: %1 (installed %2). <a href=\"%3\">Release notes</a>"
 msgstr ""
 "Mise à jour disponible : %1 (version installée : %2). <a href=\"%3\">Notes "
 "de version</a>"
 
-#: src/configpage.cpp:183
+#: src/configpage.cpp:191
 #, kde-format
 msgid "Up to date (installed %1)."
 msgstr "À jour (version installée : %1)."
@@ -148,192 +148,200 @@ msgstr "Impossible d'enregistrer l'image dans %1"
 msgid "Markdown Preview"
 msgstr "Aperçu Markdown"
 
-#: src/pluginview.cpp:56
+#: src/pluginview.cpp:57
+#, kde-format
+msgid ""
+"No Markdown document yet. Save this one as .md, or set its mode to Markdown."
+msgstr ""
+"Pas encore de document Markdown. Enregistrez celui-ci en .md, ou passez-le "
+"en mode Markdown."
+
+#: src/pluginview.cpp:63
 #, kde-format
 msgid "Preview"
 msgstr "Aperçu"
 
-#: src/pluginview.cpp:57
+#: src/pluginview.cpp:64
 #, kde-format
 msgid "Show or hide the Markdown preview beside the editor"
 msgstr "Afficher ou masquer l'aperçu Markdown à côté de l'éditeur"
 
-#: src/pluginview.cpp:62
+#: src/pluginview.cpp:68
 #, kde-format
 msgid "Export Preview as PDF..."
 msgstr "Exporter l'aperçu en PDF..."
 
-#: src/pluginview.cpp:66
+#: src/pluginview.cpp:74
 #, kde-format
 msgid "Export Preview as HTML..."
 msgstr "Exporter l'aperçu en HTML..."
 
-#: src/pluginview.cpp:150
+#: src/pluginview.cpp:166
 #, kde-format
 msgid "Untitled"
 msgstr "Sans titre"
 
-#: src/pluginview.cpp:156
+#: src/pluginview.cpp:172
 #, kde-format
 msgid "Export as PDF"
 msgstr "Exporter en PDF"
 
-#: src/pluginview.cpp:156
+#: src/pluginview.cpp:172
 #, kde-format
 msgid "Export as HTML"
 msgstr "Exporter en HTML"
 
-#: src/pluginview.cpp:158
+#: src/pluginview.cpp:174
 #, kde-format
 msgid "PDF files (*.pdf)"
 msgstr "Fichiers PDF (*.pdf)"
 
-#: src/pluginview.cpp:158
+#: src/pluginview.cpp:174
 #, kde-format
 msgid "HTML files (*.html)"
 msgstr "Fichiers HTML (*.html)"
 
-#: src/pluginview.cpp:171
+#: src/pluginview.cpp:190
 #, kde-format
 msgid "Preview exported to %1"
 msgstr "Aperçu exporté dans %1"
 
-#: src/pluginview.cpp:171
+#: src/pluginview.cpp:192
 #, kde-format
 msgid "Could not export the preview to %1"
 msgstr "Impossible d'exporter l'aperçu dans %1"
 
-#: src/pluginviewedit.cpp:82
+#: src/pluginviewedit.cpp:107
 #, kde-format
 msgid "Bold"
 msgstr "Gras"
 
-#: src/pluginviewedit.cpp:85
+#: src/pluginviewedit.cpp:114
 #, kde-format
 msgid "Italic"
 msgstr "Italique"
 
-#: src/pluginviewedit.cpp:89
+#: src/pluginviewedit.cpp:121
 #, kde-format
 msgid "Strikethrough"
 msgstr "Barré"
 
-#: src/pluginviewedit.cpp:96
+#: src/pluginviewedit.cpp:128
 #, kde-format
 msgid "Increase Heading Level"
 msgstr "Augmenter le niveau de titre"
 
-#: src/pluginviewedit.cpp:103
+#: src/pluginviewedit.cpp:135
 #, kde-format
 msgid "Decrease Heading Level"
 msgstr "Diminuer le niveau de titre"
 
-#: src/pluginviewedit.cpp:109
+#: src/pluginviewedit.cpp:142
 #, kde-format
 msgid "Paste as Link"
 msgstr "Coller comme lien"
 
-#: src/pluginviewedit.cpp:112
+#: src/pluginviewedit.cpp:149
 #, kde-format
 msgid "Format Table"
 msgstr "Mettre en forme le tableau"
 
-#: src/previewwidget.cpp:30
+#: src/previewwidget.cpp:44
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "Note"
 
-#: src/previewwidget.cpp:31
+#: src/previewwidget.cpp:45
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "Astuce"
 
-#: src/previewwidget.cpp:32
+#: src/previewwidget.cpp:46
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "Important"
 
-#: src/previewwidget.cpp:33
+#: src/previewwidget.cpp:47
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "Avertissement"
 
-#: src/previewwidget.cpp:34
+#: src/previewwidget.cpp:48
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "Attention"
 
-#: src/previewwidget.cpp:35
+#: src/previewwidget.cpp:49
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "Résumé"
 
-#: src/previewwidget.cpp:36
+#: src/previewwidget.cpp:50
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "Info"
 
-#: src/previewwidget.cpp:37
+#: src/previewwidget.cpp:51
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "À faire"
 
-#: src/previewwidget.cpp:38
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "Succès"
 
-#: src/previewwidget.cpp:39
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "Question"
 
-#: src/previewwidget.cpp:40
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "Échec"
 
-#: src/previewwidget.cpp:41
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "Danger"
 
-#: src/previewwidget.cpp:42
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "Bogue"
 
-#: src/previewwidget.cpp:43
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "Exemple"
 
-#: src/previewwidget.cpp:44
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Citation"
 
-#: src/previewwidget.cpp:61
+#: src/previewwidget.cpp:98
 #, kde-format
 msgid "GitHub only"
 msgstr "GitHub uniquement"
 
-#: src/previewwidget.cpp:63
+#: src/previewwidget.cpp:99
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "

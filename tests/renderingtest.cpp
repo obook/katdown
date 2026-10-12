@@ -1,11 +1,16 @@
+// renderingtest.cpp
 // What the page makes of each syntax: the markdown-it plugins, CodiMD, Obsidian, math written
 // for MathJax, and the ordinary Markdown these additions must leave alone.
+// Author: Olivier Booklage
+// Date: October 2026
+// License: GPL-3.0-or-later
 
 #include "testhelpers.h"
 
 #include "settings.h"
 
 #include <QCheckBox>
+#include <QScopeGuard>
 
 class RenderingTest : public PreviewTest
 {
@@ -23,6 +28,8 @@ private Q_SLOTS:
     void rendersMathExtras();
     void rendersMkdocsAdmonitions();
     void rendersGithubOnly();
+    void agreesWithGithubOnDatesAndAnchors();
+    void keepsMathOnItsFeet();
 };
 
 // The libraries tested here come from qrc rather than the inlined page: the markdown-it plugins
@@ -31,10 +38,10 @@ private Q_SLOTS:
 void RenderingTest::rendersCodimdExtensions()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
 
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral(":::info\nthe boxed line\n:::\n\n==marked== and $a^2$\n\n> :warning: mind `:smile:` in code\n\n```mermaid\ngraph LR\n  A --> B\n```\n"));
     QVERIFY(waitForPageText(preview.get(), QLatin1String("the boxed line")));
@@ -43,7 +50,7 @@ void RenderingTest::rendersCodimdExtensions()
     const QString quote = evalJs(preview.get(), QStringLiteral("document.querySelector('blockquote').textContent"));
     QVERIFY2(quote.contains(QChar(0x26A0)) && !quote.contains(QLatin1String(":warning:")), qPrintable(quote));
     QVERIFY2(quote.contains(QLatin1String(":smile:")), qPrintable(quote));
-    QTRY_COMPARE_WITH_TIMEOUT(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('pre.mermaid svg').length")), QStringLiteral("1"), 20000);
+    QTRY_COMPARE_WITH_TIMEOUT(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('pre.mermaid svg').length")), QStringLiteral("1"), PageTimeoutMs);
 
     // Ctrl + wheel over the diagram zooms it.
     const QString width = QStringLiteral("document.querySelector('pre.mermaid svg').getBoundingClientRect().width");
@@ -61,9 +68,9 @@ void RenderingTest::rendersCodimdExtensions()
 void RenderingTest::rendersObsidianSyntax()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("> [!faq]- Why *now*?\n> the folded answer\n\n> [!bug]\n> the bug line\n\n"
                                 "See [[Other Note|the other]] and ![[%1|40]] %%hidden words%% end.\n\n%%\na hidden block\n%%\n\nlast line\n")
@@ -87,9 +94,9 @@ void RenderingTest::rendersObsidianSyntax()
 void RenderingTest::rendersMathLikeMathJax()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("struck $\\require{cancel} \\cancel{5}$\n\n"
                                 "$\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}$\n\n"
@@ -116,15 +123,15 @@ void RenderingTest::rendersMathLikeMathJax()
 void RenderingTest::keepsOrdinaryMarkdownIntact()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("$$\nx = 1\n$$\n\n(a) the kept line\n\n"
                                 "See [[1]](https://example.com/ref) here.\n\n"
                                 "<h2 id=\"install\">Installation</h2>\n\n## What's new?\n\n"
                                 "> [!NOTE]  \n> the callout body\n\n"
-                                "```\nindex.html   Point d'acces HTML\nstate.js   Gestion de l'application\n"
+                                "```\nindex.html   Point d'accès HTML\nstate.js   Gestion de l'application\n"
                                 "color-mode.js   Gestion des 10 modes couleur\nui.js   interface utilisateur\n```\n\n"
                                 "```js\nvar a = 'b';\n```\n\n"
                                 "visible para\n%%\nhidden one\n\nhidden two\n%%\n\nafter all\n"));
@@ -150,9 +157,9 @@ void RenderingTest::keepsOrdinaryMarkdownIntact()
 void RenderingTest::keepsFoldingAndUniqueIds()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     const QString source = QStringLiteral("## Setup\n\n## Setup\n\n## Setup 1\n\n> [!faq]- Folded\n> the answer\n\nfirst version\n");
     doc->setText(source);
@@ -173,9 +180,9 @@ void RenderingTest::keepsFoldingAndUniqueIds()
 void RenderingTest::rendersMathExtras()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     evalJs(preview.get(), QStringLiteral("window.__setMacros('\\\\newcommand{\\\\N}{\\\\mathbb{N}}'); 1"));
     doc->setText(QStringLiteral("$\\newcommand{\\R}{\\mathbb{R}}$ then $x \\in \\R$ and $n \\in \\N$\n\n"
@@ -194,9 +201,9 @@ void RenderingTest::rendersMathExtras()
 void RenderingTest::rendersMkdocsAdmonitions()
 {
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("intro\n!!! note \"Custom *title*\"\n    inside the note\n\n    second paragraph\n\n"
                                 "??? tip\n    folded tip body\n\n!!! danger \"\"\n    no title here\n\nthe last line\n"));
@@ -218,10 +225,15 @@ void RenderingTest::rendersMkdocsAdmonitions()
 // bar drives it through the settings.
 void RenderingTest::rendersGithubOnly()
 {
+    // The check box writes the setting: put it back for the tests that follow.
+    const auto restore = qScopeGuard([wasGithubOnly = Settings::self()->githubOnly()]() {
+        Settings::self()->setGithubOnly(wasGithubOnly);
+    });
+
     KTextEditor::Document *doc = openDocument();
-    QTRY_VERIFY(doc->text().contains(Body));
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
-    QVERIFY(waitForPageText(preview.get(), Body));
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("# Title\n\n[TOC]\n\n:::info\nboxed\n:::\n\n==marked== ++inserted++ H~2~O [[Note]]\n\n"
                                 "!!! note\n    admonition body\n\n> [!faq] Obsidian title\n> callout body\n\n"
@@ -247,6 +259,50 @@ void RenderingTest::rendersGithubOnly()
     Settings::self()->setGithubOnly(false);
     QTRY_COMPARE(countElements(preview.get(), "mark"), 1);
     QVERIFY(!githubOnly->isChecked());
+
+    delete doc;
+}
+
+// Two details where the page has to agree with GitHub: a date of the front matter shows as
+// it is written, and every space of a title counts in the id of its heading.
+void RenderingTest::agreesWithGithubOnDatesAndAnchors()
+{
+    KTextEditor::Document *doc = openDocument();
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+
+    doc->setText(QStringLiteral("---\ndate: 2026-10-03\n---\n\n## Foo & Bar\n\nthe last line\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("the last line")));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('table td:last-child').textContent")), QStringLiteral("2026-10-03"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('h2').id")), QStringLiteral("foo--bar"));
+
+    delete doc;
+}
+
+// A "$" inside \text{} opens a formula again, as in LaTeX. And a macro of the settings
+// that KaTeX cannot read costs that macro alone, not the whole document.
+void RenderingTest::keepsMathOnItsFeet()
+{
+    const auto restore = qScopeGuard([macros = Settings::self()->mathMacros()]() {
+        Settings::self()->setMathMacros(macros);
+    });
+
+    KTextEditor::Document *doc = openDocument();
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+
+    doc->setText(QStringLiteral("$$ f(x) = \\begin{cases} 1 & \\text{si $x>0$} \\\\ 0 & \\text{sinon} \\end{cases} $$\n\nthe last line\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("the last line")));
+    QCOMPARE(countElements(preview.get(), ".katex-display"), 1);
+    QCOMPARE(countElements(preview.get(), ".katex-error, .katex [style*=\"color:#cc0000\"]"), 0);
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('.katex-html').textContent.indexOf('$')")), QStringLiteral("-1"));
+
+    Settings::self()->setMathMacros(QStringLiteral("\\newcommand{}{x}"));
+    doc->setText(QStringLiteral("still $a^2$ here\n\nthe closing line\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("the closing line")));
+    QCOMPARE(countElements(preview.get(), ".katex"), 1);
 
     delete doc;
 }

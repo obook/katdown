@@ -10,11 +10,14 @@
 #include "pluginview.h"
 
 #include <QAction>
+#include <QDesktopServices>
 #include <QIcon>
 #include <QKeySequence>
+#include <QUrl>
 
 #include <KActionCollection>
 #include <KLocalizedString>
+#include <KStandardGuiItem>
 #include <KTextEditor/Document>
 #include <KTextEditor/MainWindow>
 #include <KTextEditor/Message>
@@ -27,13 +30,25 @@ constexpr int MessageTimeoutMs = 5000;
 } // namespace
 
 // Show a short message at the top of the active view, the way Kate reports its own events.
-void PluginView::showMessage(const QString &text, bool isError)
+// With fileToOpen, the message carries a button that opens that file.
+void PluginView::showMessage(const QString &text, bool isError, const QString &fileToOpen)
 {
     KTextEditor::View *view = m_mainWindow->activeView();
     if (!view) {
         return;
     }
     auto *message = new KTextEditor::Message(text, isError ? KTextEditor::Message::Error : KTextEditor::Message::Positive);
+    if (!fileToOpen.isEmpty()) {
+        // A button: Kate does nothing when a link in the text is clicked. KDE's own "Open"
+        // is already translated; its "..." would announce a dialog, and none comes.
+        const KGuiItem open = KStandardGuiItem::open();
+        const QString label = open.text().remove(QLatin1String("...")).remove(QChar(0x2026));
+        auto *action = new QAction(open.icon(), label, message);
+        connect(action, &QAction::triggered, message, [fileToOpen]() {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(fileToOpen));
+        });
+        message->addAction(action);
+    }
     message->setView(view);
     message->setAutoHide(MessageTimeoutMs);
     view->document()->postMessage(message);
@@ -66,7 +81,16 @@ KTextEditor::View *PluginView::markdownView() const
 void PluginView::addEditAction(const QString &name, const QString &text, const QString &iconName, const QKeySequence &shortcut, const EditFunction &edit)
 {
     QAction *action = addAction(name, text, QIcon::fromTheme(iconName));
-    actionCollection()->setDefaultShortcut(action, shortcut);
+    bool takesAltGr = false;
+#ifdef Q_OS_WIN
+    // Windows sends AltGr as Ctrl+Alt: such a shortcut would take the euro sign, or the "|"
+    // a table needs. The action stays in the menu and the user can give it a key.
+    const Qt::KeyboardModifiers altGr = Qt::ControlModifier | Qt::AltModifier;
+    takesAltGr = (shortcut[0].keyboardModifiers() & altGr) == altGr;
+#endif
+    if (!takesAltGr) {
+        actionCollection()->setDefaultShortcut(action, shortcut);
+    }
     connect(action, &QAction::triggered, this, [this, edit]() {
         KTextEditor::View *view = markdownView();
         if (view) {
@@ -79,12 +103,20 @@ void PluginView::addEditAction(const QString &name, const QString &text, const Q
 // usual in other Markdown editors, are Kate's bookmark and indentation shortcuts.
 void PluginView::addEditActions()
 {
-    addEditAction(QStringLiteral("katemark_bold"), i18n("Bold"), QStringLiteral("format-text-bold"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_B), [](KTextEditor::View *view) {
-        toggleInlineMarker(view, QStringLiteral("**"));
-    });
-    addEditAction(QStringLiteral("katemark_italic"), i18n("Italic"), QStringLiteral("format-text-italic"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_E), [](KTextEditor::View *view) {
-        toggleInlineMarker(view, QStringLiteral("*"));
-    });
+    addEditAction(QStringLiteral("katemark_bold"),
+                  i18n("Bold"),
+                  QStringLiteral("format-text-bold"),
+                  QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_B),
+                  [](KTextEditor::View *view) {
+                      toggleInlineMarker(view, QStringLiteral("**"));
+                  });
+    addEditAction(QStringLiteral("katemark_italic"),
+                  i18n("Italic"),
+                  QStringLiteral("format-text-italic"),
+                  QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_E),
+                  [](KTextEditor::View *view) {
+                      toggleInlineMarker(view, QStringLiteral("*"));
+                  });
     addEditAction(QStringLiteral("katemark_strikethrough"),
                   i18n("Strikethrough"),
                   QStringLiteral("format-text-strikethrough"),
@@ -106,10 +138,18 @@ void PluginView::addEditActions()
                   [](KTextEditor::View *view) {
                       shiftHeadingLevel(view, -1);
                   });
-    addEditAction(QStringLiteral("katemark_paste_link"), i18n("Paste as Link"), QStringLiteral("insert-link"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V), [](KTextEditor::View *view) {
-        pasteClipboardLink(view);
-    });
-    addEditAction(QStringLiteral("katemark_format_table"), i18n("Format Table"), QStringLiteral("table"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F), [](KTextEditor::View *view) {
-        formatTableAtCursor(view);
-    });
+    addEditAction(QStringLiteral("katemark_paste_link"),
+                  i18n("Paste as Link"),
+                  QStringLiteral("insert-link"),
+                  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V),
+                  [](KTextEditor::View *view) {
+                      pasteClipboardLink(view);
+                  });
+    addEditAction(QStringLiteral("katemark_format_table"),
+                  i18n("Format Table"),
+                  QStringLiteral("table"),
+                  QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F),
+                  [](KTextEditor::View *view) {
+                      formatTableAtCursor(view);
+                  });
 }

@@ -1,7 +1,8 @@
 // testhelpers.h
 // What the test programs share: a document in a temporary folder, and ways to look
 // into the rendered page.
-// Helpers by uwuclxdy and Olivier Booklage. License: GPL-3.0-or-later
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
 
 #pragma once
 
@@ -21,7 +22,14 @@
 #include <KLocalizedString>
 #include <KTextEditor/Editor>
 
-const QLatin1String Body("the cached body line");
+// How long the tests wait, in milliseconds.
+constexpr int JsAnswerTimeoutMs = 5000; // for one expression evaluated in the page
+constexpr int ReactionTimeoutMs = 10000; // for the page or the editor to follow a change
+constexpr int PageTimeoutMs = 20000; // for the page to render a document or load a picture
+constexpr int ExportTimeoutMs = 30000; // for an export, or for reading one back
+
+// The line of sample.md that the tests look for in the page.
+const QLatin1String SampleBodyLine("the cached body line");
 const QLatin1String ImageName("red.png");
 constexpr int ImageWidth = 2;
 // A 2x1 red PNG, inline so the test carries no fixture file. Two pixels wide because a
@@ -31,6 +39,12 @@ const QByteArray RedPng =
                         "07b40e8dd0000000d4944415478da63f8cfc000440008fe01ff19c06be"
                         "70000000049454e44ae426082");
 
+// What the page answers to evalJs(), and whether the answer has come yet.
+struct JsAnswer {
+    QString value;
+    bool arrived = false;
+};
+
 // Evaluate one expression in the page and hand back its value as a string.
 inline QString evalJs(PreviewWidget *preview, const QString &code)
 {
@@ -38,18 +52,18 @@ inline QString evalJs(PreviewWidget *preview, const QString &code)
     if (!view) {
         return QString();
     }
-    // The callback outlives this call if the deadline expires first, so the result
+    // The callback outlives this call if the deadline expires first, so the answer
     // cannot live on the stack.
-    auto slot = std::make_shared<std::pair<QString, bool>>(QString(), false);
-    view->page()->runJavaScript(code, [slot](const QVariant &result) {
-        slot->first = result.toString();
-        slot->second = true;
+    auto answer = std::make_shared<JsAnswer>();
+    view->page()->runJavaScript(code, [answer](const QVariant &result) {
+        answer->value = result.toString();
+        answer->arrived = true;
     });
-    QDeadlineTimer deadline(5000);
-    while (!slot->second && !deadline.hasExpired()) {
+    QDeadlineTimer deadline(JsAnswerTimeoutMs);
+    while (!answer->arrived && !deadline.hasExpired()) {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
     }
-    return slot->first;
+    return answer->value;
 }
 
 // Number of elements of the page that match a CSS selector.
@@ -68,7 +82,7 @@ inline QString pageText(PreviewWidget *preview)
 // blocked request from a rendered <img> tag.
 inline int waitForImageWidth(PreviewWidget *preview)
 {
-    QDeadlineTimer deadline(20000);
+    QDeadlineTimer deadline(PageTimeoutMs);
     while (!deadline.hasExpired()) {
         const int width = evalJs(preview, QStringLiteral("document.images.length ? document.images[0].naturalWidth : 0")).toInt();
         if (width > 0) {
@@ -81,7 +95,7 @@ inline int waitForImageWidth(PreviewWidget *preview)
 
 inline bool waitForPageText(PreviewWidget *preview, QLatin1String needle)
 {
-    QDeadlineTimer deadline(20000);
+    QDeadlineTimer deadline(PageTimeoutMs);
     while (!deadline.hasExpired()) {
         if (pageText(preview).contains(needle)) {
             return true;
@@ -104,7 +118,7 @@ protected:
         m_path = m_dir.filePath(QStringLiteral("sample.md"));
         QFile f(m_path);
         QVERIFY(f.open(QIODevice::WriteOnly));
-        QVERIFY(f.write(QByteArrayLiteral("# katemark\n\nthe cached body line.\n")) > 0);
+        QVERIFY(f.write(QStringLiteral("# katemark\n\n%1.\n").arg(SampleBodyLine).toUtf8()) > 0);
         f.close();
 
         QFile png(m_dir.filePath(ImageName));
