@@ -10,7 +10,7 @@ This PR
 
 ## AI
 
-<!-- Tick the closest. Any level of AI use is fine; this is just reviewer context. Authoring this PR as an autonomous agent? Use the agent format instead: `.github/PULL_REQUEST_TEMPLATE/agent.md` (append `?template=agent.md` to the compare URL). -->
+<!-- Tick the closest; any level of AI use is fine. -->
 
 - [ ] no AI
 - [ ] AI-assisted, I reviewed everything

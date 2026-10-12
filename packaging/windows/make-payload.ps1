@@ -3,13 +3,10 @@
 Assemble the Windows distribution: the plugin plus the Qt WebEngine runtime Kate does not ship.
 
 .DESCRIPTION
-The file list is explicit rather than whatever windeployqt produces, for two reasons. windeployqt
-deploys the closure a generic Qt app might need (QML debug tooling, geolocation backends, a PDF
-module, a bundled VC redist installer), roughly 42 MB of which katemark never touches. And it fails
-part way on a Craft layout, because it looks for the WebEngine .pak files under a resources\
-subdirectory that Craft does not create.
-
-The list has two halves, and they need different evidence.
+The file list is explicit, because windeployqt deploys the closure a generic Qt app might need (QML
+debug tooling, geolocation backends, a PDF module, a bundled VC redist installer), roughly 42 MB of
+which katemark never touches. It also fails part way on a Craft layout, because it looks for the
+WebEngine .pak files under a resources\ subdirectory that Craft does not create.
 
 DLLs are settled by import analysis: kept when they are a static import of Qt6WebEngineCore or
 Qt6WebEngineWidgets, dropped when the plugin still resolved every import with the file absent, on a
@@ -21,13 +18,10 @@ help; dxcompiler.dll and dxil.dll exist in neither Craft nor Kate nor a stock Wi
 there is nothing to ship. Chromium falls back to software rendering when it cannot compile D3D
 shaders, which is already what happens on hardware that fails GPU init.
 
-Data files are settled ONLY by running something that renders. They are opened by name at runtime,
-so a clean link, a clean `dumpbin /dependents`, and a successful `LoadLibraryExW` all stay green
-with any of them missing. Two shipped as absent before a real render test caught them: the locale
-pak (wrong directory) and `v8_context_snapshot.bin` (never copied at all, because windeployqt exits
-1 partway through its WebEngine resources step on a Craft layout and the hand-written replacement
-list did not know about it). Do not add or remove anything in the data-file half on the strength of
-a load test.
+Chromium opens the data files by name at runtime, so a link, `dumpbin /dependents`, and
+`LoadLibraryExW` all succeed with one missing: only a render test tells. Two were missing once, the
+locale pak (wrong directory) and `v8_context_snapshot.bin` (never copied: the hand-written list did
+not have it). Run a render test before adding or removing a data file.
 
 Anything Kate already ships is deliberately absent: install.ps1 refuses to overwrite files it did
 not put there, so a payload that duplicated Kate's own Qt would refuse to install.
@@ -69,15 +63,15 @@ $Files = [ordered]@{
     'bin\Qt6Positioning.dll'                = 'bin\Qt6Positioning.dll'
     # Chromium's render process. WebEngine spawns this as a separate executable.
     'bin\QtWebEngineProcess.exe'            = 'bin\QtWebEngineProcess.exe'
-    # Chromium data files, all opened by name at runtime. None of them appears in any import table,
-    # so nothing about a successful link or a successful LoadLibrary says they are present.
+    # Chromium data files, opened by name at runtime. None appears in an import table, so a link or
+    # a LoadLibrary succeeds without them.
     'bin\icudtl.dat'                        = 'bin\icudtl.dat'
     'bin\qtwebengine_resources.pak'         = 'bin\qtwebengine_resources.pak'
     'bin\qtwebengine_resources_100p.pak'    = 'bin\qtwebengine_resources_100p.pak'
     'bin\qtwebengine_resources_200p.pak'    = 'bin\qtwebengine_resources_200p.pak'
-    # Omitting this one costs every renderer process: V8 aborts at
-    # gin/v8_initializer.cc "Error loading V8 startup snapshot file" ~34 ms in, so pages navigate,
-    # renderers respawn, and no script ever runs. The preview looks empty with nothing on stdout.
+    # Without this one V8 aborts at gin/v8_initializer.cc ("Error loading V8 startup snapshot file")
+    # ~34 ms in: pages navigate, renderers respawn, and no script runs. The preview looks empty with
+    # nothing on stdout.
     'bin\v8_context_snapshot.bin'           = 'bin\v8_context_snapshot.bin'
     # English locale only. The full set is 53 files and 45 MB for strings a markdown preview never
     # shows; Chromium falls back to en-US when a locale is missing.
@@ -101,8 +95,7 @@ if (Test-Path $payloadDir) {
 }
 New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
 
-# Collect every missing source before failing, so a Qt layout change reports all of its damage in
-# one run instead of one file per attempt.
+# List every missing source before failing: after a Qt layout change, one run shows them all.
 $missing = @()
 foreach ($src in $Files.Keys) {
     if (-not (Test-Path (Join-Path $CraftRoot $src))) {
@@ -144,9 +137,8 @@ if ($Zip) {
     if (Test-Path $Zip) {
         Remove-Item -LiteralPath $Zip -Force
     }
-    # Compress into a temp file, never straight into $OutDir: the usual call site puts the zip
-    # inside the directory being zipped, and an archive that grows while it is its own input is a
-    # good way to ship a corrupt one.
+    # Compress into a temp file: the usual call site puts the zip inside $OutDir, the directory
+    # being zipped, and an archive that is its own input comes out corrupt.
     $staging = Join-Path ([System.IO.Path]::GetTempPath()) ("katemark-" + [System.IO.Path]::GetRandomFileName() + ".zip")
     Compress-Archive -Path (Join-Path $OutDir '*') -DestinationPath $staging -CompressionLevel Optimal
     Move-Item -LiteralPath $staging -Destination $Zip -Force

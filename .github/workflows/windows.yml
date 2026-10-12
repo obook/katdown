@@ -6,17 +6,17 @@
 # files.kde.org. It runs on tags (to attach the release artifact), on changes to the build inputs,
 # and on demand.
 #
-# --ci-mode is load-bearing, not decoration: without it a hash mismatch on a mirror-served archive
-# drops Craft into an interactive prompt that dies with EOFError on a runner.
+# Keep --ci-mode: without it a hash mismatch on a mirror-served archive drops Craft into an
+# interactive prompt that dies with EOFError on a runner.
 #
 # actions/checkout is SHA-pinned because the tag path runs with a write-scoped GITHUB_TOKEN.
 
 name: windows
 
 on:
-  # No paths filter on the tag trigger. GitHub ANDs branches/tags with paths, so a release tag
-  # landing on a commit that happened not to touch src/ would skip this job and publish a release
-  # with no Windows artifact, silently.
+  # No paths filter on the tag trigger. GitHub ANDs branches/tags with paths, so a release tag on a
+  # commit that does not touch src/ would skip this job and publish a release with no Windows
+  # artifact and no error.
   push:
     tags:
       - 'v*'
@@ -43,10 +43,10 @@ defaults:
 
 jobs:
   build:
-    # Pinned, not windows-latest. That label now points at Windows Server 2025 with Visual Studio
-    # 2026, where Craft's bundled vswhere finds no Visual Studio at all and the bootstrap aborts.
-    # msvc2022 is also what everything else here targets: Kate's own Windows build, Craft's binary
-    # cache, and Craft's own default ABI, whose source still calls msvc2026 untested.
+    # windows-latest now points at Windows Server 2025 with Visual Studio 2026, where Craft's
+    # bundled vswhere finds no Visual Studio and the bootstrap aborts. Kate's own Windows build,
+    # Craft's binary cache, and Craft's default ABI target msvc2022 too; Craft's source still calls
+    # msvc2026 untested.
     runs-on: windows-2022
     timeout-minutes: 120
     permissions:
@@ -108,9 +108,8 @@ jobs:
       - name: verify craft abi
         run: |
           $ErrorActionPreference = 'Stop'
-          # Read the setting the bootstrap wrote rather than parsing craftenv's banner: the plugin
-          # has to match Kate's own ABI exactly or it silently never loads, so this fails the run
-          # instead of shipping a DLL nobody can use.
+          # The plugin has to match Kate's own ABI or it never loads: read the ABI the bootstrap
+          # wrote and fail the run on another one.
           $abi = (Select-String -Path C:\CraftRoot\etc\CraftSettings.ini -Pattern '^\s*ABI\s*=\s*(\S+)').Matches.Groups[1].Value
           Write-Host "craft ABI: $abi"
           if ($abi -ne 'windows-cl-msvc2022-x86_64') {
@@ -123,8 +122,7 @@ jobs:
           & $env:VSDEVSH -SkipAutomaticLocation -Arch amd64 -HostArch amd64
           $env:ANDROID_SDK_ROOT = $null
           . C:\CraftRoot\craft\craftenv.ps1
-          # craftenv.ps1 leaves the shell sitting in C:\CraftRoot, so anything relative
-          # after this resolves against Craft rather than the checkout.
+          # craftenv.ps1 leaves the shell in C:\CraftRoot, where relative paths would resolve.
           Set-Location $env:GITHUB_WORKSPACE
           # 'qtwebengine' alone is ambiguous, Craft carries a Qt5 and a Qt6 blueprint under that
           # name. Craft's own downloader has been seen hanging on large mirror-served archives, so
@@ -147,8 +145,7 @@ jobs:
           & $env:VSDEVSH -SkipAutomaticLocation -Arch amd64 -HostArch amd64
           $env:ANDROID_SDK_ROOT = $null
           . C:\CraftRoot\craft\craftenv.ps1
-          # craftenv.ps1 leaves the shell sitting in C:\CraftRoot, so anything relative
-          # after this resolves against Craft rather than the checkout.
+          # craftenv.ps1 leaves the shell in C:\CraftRoot, where relative paths would resolve.
           Set-Location $env:GITHUB_WORKSPACE
           cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH=C:/CraftRoot -DBUILD_TESTING=ON
           if ($LASTEXITCODE -ne 0) { throw 'cmake configure failed' }
@@ -161,8 +158,7 @@ jobs:
           & $env:VSDEVSH -SkipAutomaticLocation -Arch amd64 -HostArch amd64
           $env:ANDROID_SDK_ROOT = $null
           . C:\CraftRoot\craft\craftenv.ps1
-          # craftenv.ps1 leaves the shell sitting in C:\CraftRoot, so anything relative
-          # after this resolves against Craft rather than the checkout.
+          # craftenv.ps1 leaves the shell in C:\CraftRoot, where relative paths would resolve.
           Set-Location $env:GITHUB_WORKSPACE
           $match = Select-String -Path CMakeLists.txt -Pattern '^project\(.*VERSION\s+([0-9.]+)'
           if (-not $match) { throw 'could not read the project version out of CMakeLists.txt' }
@@ -174,25 +170,22 @@ jobs:
             -Zip "dist\katemark-$version-windows-x86_64.zip"
           Get-ChildItem dist\*.zip | ForEach-Object { "{0}  {1:N0} bytes" -f $_.Name, $_.Length }
 
-      # The packaged artifact is verified against a REAL Kate install, not against Craft's own
-      # complete Qt. That distinction is the whole value of this step: the payload once shipped
-      # without v8_context_snapshot.bin, and every check that ran against Craft's tree passed,
-      # because Craft's tree has the file. Only a render inside a Kate install can catch a data
-      # file the payload forgot.
+      # Test the zip in a real Kate install, with a render: Craft's tree has files the payload may
+      # lack. The payload once shipped without v8_context_snapshot.bin, and every check against
+      # Craft's tree passed.
       - name: verify the artifact against a real Kate
         run: |
           $ErrorActionPreference = 'Stop'
-          # Resolve both the release series and the build rather than pinning either. KDE's CI
-          # retention rotates old builds off, so a pinned URL 404s within weeks, and the series
-          # rolls over twice a year. Always testing against the newest Kate also makes this job the
-          # canary for Kate moving to a Qt the payload no longer matches.
+          # Look up the release series and the build: KDE's CI drops old builds, so a pinned URL
+          # 404s within weeks, and the series changes twice a year. Testing the newest Kate also
+          # tells when Kate moves to a Qt the payload no longer matches.
           $root = 'https://cdn.kde.org/ci-builds/utilities/kate/'
           $series = [regex]::Matches((Invoke-WebRequest -Uri $root -UseBasicParsing).Content, 'href="(release-[0-9.]+)/"') |
             ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
           if (-not $series) { throw "no release-* series found at $root" }
           # The newest series dir usually appears before its Windows CI builds land on the CDN, so
-          # walk back to the newest series that has a windows/ listing. Still a canary: it tests the
-          # newest Kate the payload can be verified against.
+          # walk back to the newest series that has a windows/ listing. That is still the newest
+          # Kate the payload can be tested against.
           $dir = $null
           for ($i = $series.Count - 1; $i -ge 0; $i--) {
             $candidate = $root + $series[$i] + '/windows/'

@@ -3,6 +3,6 @@ blank_issues_enabled: true
 contact_links:
   # No Discussions row: the repo has Discussions turned off, and a chooser link to a disabled
   # tab lands on a 404.
-  - name: AI / agent contribution guide
-    url: https://github.com/obook/katemark/blob/HEAD/.github/CONTRIBUTING.md#ai-and-agent-contributions
-    about: Contributing AI-assisted work, or filing on behalf of an operator? Read this first.
+  - name: AI contribution guide
+    url: https://github.com/obook/katemark/blob/HEAD/.github/CONTRIBUTING.md#ai-contributions
+    about: Read this before contributing AI-assisted work.
