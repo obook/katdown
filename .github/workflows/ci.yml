@@ -1,15 +1,12 @@
-# Build the plugin on Linux and run the test suite on every push and PR. Nothing else covers
-# Linux: release.yml only reacts to tags, windows.yml only builds the Windows payload, and the
-# AUR package builds on the user's own machine, so a commit that broke the Arch build used to
-# reach katemark-git users before it reached anyone here.
+# Build the plugin on Linux and run the tests on every push and PR. Without this, a commit
+# that breaks the Arch build reaches katemark-git users first.
 #
-# Arch in a container rather than a native ubuntu runner: Ubuntu's KF6 packages trail the
-# frameworks this targets, and the AUR package is how Linux users install this, so the gate
-# builds against the same rolling Qt6/KF6 they get. `pacman -Syu` is what picks those versions;
-# the image digest only fixes the starting point, and it is the same pin publish-aur.yml uses.
+# Arch in a container: it has the rolling Qt6/KF6 the AUR package builds against, which
+# Ubuntu's packages trail. `pacman -Syu` picks those versions; the image digest only fixes
+# the starting point.
 #
-# The preview is a QWebEngineView, so the test drives a headless Chromium as root. The offscreen
-# platform and --no-sandbox come from the test's own ENVIRONMENT property in tests/CMakeLists.txt,
+# The preview is a QWebEngineView, so the tests drive a headless Chromium as root. The offscreen
+# platform and --no-sandbox come from the tests' own ENVIRONMENT property in tests/CMakeLists.txt,
 # so there is nothing to set here. The default 64 MB /dev/shm a container gets is enough for it
 # (verified 2026-08-09: passes with and without a larger --shm-size).
 
@@ -49,14 +46,15 @@ jobs:
       image: archlinux:base-devel@sha256:6db772fd1dd128b9cf7b7231ca5284af70879596fe4ec754c911cfc4ac30d5eb
 
     steps:
-      # Mirrors aur/PKGBUILD's depends + makedepends, plus ninja for the generator this uses and
-      # git for the checkout below (base-devel carries the compiler, not git).
+      # Mirrors aur/PKGBUILD's depends + makedepends, plus ninja for the generator this uses,
+      # git for the checkout below (base-devel carries the compiler, not git) and poppler, whose
+      # pdftotext reads the exported PDF back in one test.
       - name: install dependencies
         run: |
           set -Eeuo pipefail
           pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git cmake ninja extra-cmake-modules \
-            ktexteditor syntax-highlighting kxmlgui kconfig ki18n kcoreaddons qt6-base qt6-webengine
+          pacman -S --noconfirm --needed git cmake ninja extra-cmake-modules poppler \
+            ktexteditor syntax-highlighting kxmlgui kwidgetsaddons kconfig ki18n kcoreaddons qt6-base qt6-webengine
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
@@ -67,6 +65,6 @@ jobs:
         run: cmake --build build
 
       # --no-tests=error because a bare ctest exits 0 when it finds nothing to run, so a change
-      # that stopped BUILD_TESTING from registering the test would leave this step green.
+      # that stopped BUILD_TESTING from registering the tests would leave this step green.
       - name: test
         run: ctest --test-dir build --output-on-failure --no-tests=error

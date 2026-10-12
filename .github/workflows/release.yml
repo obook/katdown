@@ -1,12 +1,9 @@
-# Cut a GitHub Release on every v* tag push. Releases exist purely as version markers: the
-# plugin's in-app update check (Settings -> Katemark) compares the installed version
-# against the latest release tag. This job builds nothing itself; windows.yml and deb.yml run on
-# the same tag and attach the Windows zip and the Debian packages once this has created the
-# release.
+# Create a GitHub release on every v* tag. The update check (Settings -> Katemark) compares
+# the installed version with the latest release tag. windows.yml and deb.yml run on the same
+# tag and attach the Windows zip and the Debian packages.
 #
-# Tagging discipline: the tag must match project(VERSION) in CMakeLists.txt (and the Version in
-# src/katemark.json), otherwise the in-app check reports a phantom update. The job hard
-# fails on a mismatch so a stale version bump can't ship.
+# The tag must match project(VERSION) in CMakeLists.txt and Version in src/katemark.json, or
+# the update check reports an update that does not exist. The job fails on a mismatch.
 #
 # actions/checkout is SHA-pinned because this workflow runs with a write-scoped GITHUB_TOKEN.
 
@@ -45,15 +42,10 @@ jobs:
         run: |
           set -Eeuo pipefail
           tag="$GITHUB_REF_NAME"
-          # Pre-release versions (v1.2.0-rc1, v1.2.0-beta) carry a hyphen; mark them so the
-          # update check can ignore them as "latest" until a final tag lands.
-          prerelease=""
-          case "$tag" in *-*) prerelease="--prerelease" ;; esac
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "release $tag already exists; nothing to do"
             exit 0
           fi
           gh release create "$tag" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "$tag" \
-            $prerelease
+            --title "$tag"

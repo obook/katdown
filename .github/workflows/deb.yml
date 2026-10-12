@@ -46,12 +46,12 @@ jobs:
             image: ubuntu:24.04@sha256:a853f94d226358a79c740cfc7bce0c289748f3fe3488d921d038ccd752c61b60
             packages: >-
               qt6-webengine-dev kf6-ktexteditor-dev kf6-kcoreaddons-dev kf6-ki18n-dev
-              kf6-kconfig-dev kf6-kxmlgui-dev kf6-syntax-highlighting-dev
+              kf6-kconfig-dev kf6-kxmlgui-dev kf6-kwidgetsaddons-dev kf6-syntax-highlighting-dev
           - target: ubuntu26.04
             image: ubuntu:26.04@sha256:3595d7fc4286a33fad0fd853a4063e654287a9c3787437d7937c94ca3f7a804e
             packages: >-
               qt6-webengine-dev libkf6texteditor-dev libkf6coreaddons-dev libkf6i18n-dev
-              libkf6config-dev libkf6xmlgui-dev libkf6syntaxhighlighting-dev
+              libkf6config-dev libkf6xmlgui-dev libkf6widgetsaddons-dev libkf6syntaxhighlighting-dev
     container:
       image: ${{ matrix.image }}
     env:
@@ -79,14 +79,15 @@ jobs:
             > /etc/apt/sources.list.d/neon.list
 
       # file is what cpack reads the plugin's architecture with, gh uploads the package, git is
-      # for the checkout below. ca-certificates is what lets git and gh reach GitHub: with
-      # --no-install-recommends nothing else brings it in.
+      # for the checkout below, poppler-utils has the pdftotext one test reads a PDF back with.
+      # ca-certificates is what lets git and gh reach GitHub: with --no-install-recommends
+      # nothing else brings it in.
       - name: install dependencies
         run: |
           set -Eeuo pipefail
           apt-get update
           apt-get install -y --no-install-recommends \
-            ca-certificates g++ cmake extra-cmake-modules gettext dpkg-dev file gh git $PACKAGES
+            ca-certificates g++ cmake extra-cmake-modules gettext dpkg-dev file gh git poppler-utils $PACKAGES
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
