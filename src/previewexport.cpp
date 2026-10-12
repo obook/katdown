@@ -65,6 +65,27 @@ QString embedLocalImages(const QString &html, const LocalFileGuard &guard)
     return result + html.mid(copied);
 }
 
+// Print the page to a PDF file, on A4 or Letter by the locale. The page answers with
+// pdfPrintingFinished.
+void printPdf(QWebEnginePage *page, const QString &path)
+{
+    const QPageSize size(QLocale().measurementSystem() == QLocale::MetricSystem ? QPageSize::A4 : QPageSize::Letter);
+    page->printToPdf(path, QPageLayout(size, QPageLayout::Portrait, QMarginsF(ExportMarginMm, ExportMarginMm, ExportMarginMm, ExportMarginMm), QPageLayout::Millimeter));
+}
+
+// How many pages a PDF written by Chromium has, 0 when the file cannot be read. Chromium
+// writes "/Type /Page" once per page and "/Type /Pages" once per node of the page tree,
+// both in clear.
+int pdfPageCount(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return 0;
+    }
+    const QByteArray pdf = file.readAll();
+    return pdf.count("/Type /Page") - pdf.count("/Type /Pages");
+}
+
 // A page that stands on its own: the rendered article with the stylesheets it needs and
 // no script. Its policy refuses what the raw HTML of a document could still bring:
 // javascript: links, frames, forms, plugins.
@@ -144,6 +165,9 @@ void PreviewWidget::endExport(bool ok)
     if (!isExporting()) {
         return;
     }
+    if (std::exchange(m_printsUnnumbered, false)) {
+        runJs(QStringLiteral("window.__setPageNumbers(true);"));
+    }
     const QString path = std::exchange(m_exportPath, QString());
     if (m_loaded) {
         applyTheme();
@@ -175,10 +199,28 @@ void PreviewWidget::exportPdf(const QString &path)
             if (run != m_exportRun || !isExporting()) {
                 return; // ended meanwhile, by a reload of the page
             }
-            const QPageSize size(QLocale().measurementSystem() == QLocale::MetricSystem ? QPageSize::A4 : QPageSize::Letter);
-            m_web->page()->printToPdf(path, QPageLayout(size, QPageLayout::Portrait, QMarginsF(ExportMarginMm, ExportMarginMm, ExportMarginMm, ExportMarginMm), QPageLayout::Millimeter));
+            printPdf(m_web->page(), path);
         },
         MaxSettleChecks);
+}
+
+// The PDF is written. A single page needs no "1 / 1" at its foot: that file is printed
+// once more, without the numbers.
+void PreviewWidget::onPdfPrinted(const QString &path, bool ok)
+{
+    if (path != m_exportPath) {
+        return;
+    }
+    if (ok && !m_printsUnnumbered && pdfPageCount(path) == 1) {
+        m_printsUnnumbered = true;
+        m_web->page()->runJavaScript(QStringLiteral("window.__setPageNumbers(false)"), [self = QPointer<PreviewWidget>(this), path, run = m_exportRun](const QVariant &) {
+            if (self && run == self->m_exportRun && self->isExporting()) {
+                printPdf(self->m_web->page(), path);
+            }
+        });
+        return;
+    }
+    endExport(ok);
 }
 
 void PreviewWidget::exportHtml(const QString &path)

@@ -42,7 +42,7 @@ tab of its own.
 | GitHub only | A check box above the preview leaves out what GitHub would not render | fork |
 | Math | LaTeX formulas, rendered by KaTeX | fork |
 | Diagrams | Mermaid | fork |
-| Export | A PDF with numbered pages (Qt 6.10 or later), or a single self-contained HTML file | fork |
+| Export | A PDF, its pages numbered when it has more than one (Qt 6.10 or later), or a single self-contained HTML file | fork |
 | Editing actions | Bold, italic, strikethrough, heading level, paste as link, table formatting | fork |
 | Image paste | Saves a picture from the clipboard beside the document and links it | fork |
 | Languages | 44 interface languages | fork |

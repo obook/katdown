@@ -133,11 +133,7 @@ void PreviewWidget::createWebView()
     m_web->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_web, &QWidget::customContextMenuRequested, this, &PreviewWidget::showContextMenu);
     connect(page, &QWebEnginePage::scrollPositionChanged, this, &PreviewWidget::syncFromPreview);
-    connect(page, &QWebEnginePage::pdfPrintingFinished, this, [this](const QString &path, bool ok) {
-        if (path == m_exportPath) {
-            endExport(ok);
-        }
-    });
+    connect(page, &QWebEnginePage::pdfPrintingFinished, this, &PreviewWidget::onPdfPrinted);
     // A page whose process died answers nothing more: an export would wait for ever.
     connect(page, &QWebEnginePage::renderProcessTerminated, this, [this]() {
         m_loaded = false;

@@ -105,6 +105,7 @@ private:
 
     // previewexport.cpp
     bool beginExport(const QString &path);
+    void onPdfPrinted(const QString &path, bool ok);
     void endExport(bool ok);
     void whenSettled(std::function<void()> then, int checksLeft);
 
@@ -139,6 +140,7 @@ private:
     QPointer<QWidget> m_exportCover; // a picture of the page, over it during an export
     QString m_exportPath; // the file being written, empty when no export runs
     int m_exportRun = 0; // counts the exports: a cover is removed by the one that put it
+    bool m_printsUnnumbered = false; // a PDF of one page is being printed again, without "1 / 1"
     QUrl m_url;
     QString m_text;
     bool m_paused = false;
