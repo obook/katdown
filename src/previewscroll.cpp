@@ -25,6 +25,8 @@ void PreviewWidget::setView(KTextEditor::View *view)
     m_view = view;
     if (view) {
         connect(view, &KTextEditor::View::verticalScrollPositionChanged, this, &PreviewWidget::syncFromEditor);
+        // The editor's color theme can change while the application's palette stays.
+        connect(view, &KTextEditor::View::configChanged, this, &PreviewWidget::applyTheme);
         syncFromEditor();
     }
 }
@@ -67,7 +69,7 @@ void PreviewWidget::syncFromPreview()
             return;
         }
         KTextEditor::View *view = self->m_view;
-        if (line < 0) {
+        if (line < 0) { // -1: the page is at its end (see __topLine in scroll.js)
             view->setScrollPosition(view->maxScrollPosition());
             return;
         }

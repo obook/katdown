@@ -1,12 +1,18 @@
+// settings.cpp
+// Settings: reading the settings from Kate's configuration file and writing them back.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #include "settings.h"
 
 #include <KConfigGroup>
 #include <KSharedConfig>
 
-static QString groupName()
+namespace
 {
-    return QStringLiteral("Katemark");
-}
+// The group of the configuration file that holds the settings.
+const QString GroupName = QStringLiteral("Katemark");
+} // namespace
 
 Settings::Settings(QObject *parent)
     : QObject(parent)
@@ -22,17 +28,17 @@ Settings *Settings::self()
 
 void Settings::load()
 {
-    KConfigGroup cfg(KSharedConfig::openConfig(), groupName());
-    const QString mode = cfg.readEntry("Theme", QStringLiteral("github"));
-    m_mode = (mode == QLatin1String("application")) ? Application : GitHub;
+    KConfigGroup cfg(KSharedConfig::openConfig(), GroupName);
+    const QString source = cfg.readEntry("Theme", QStringLiteral("github"));
+    m_colorSource = (source == QLatin1String("application")) ? Application : GitHub;
 
     const QString variant = cfg.readEntry("GithubVariant", QStringLiteral("auto"));
     if (variant == QLatin1String("light")) {
-        m_ghVariant = Light;
+        m_githubVariant = Light;
     } else if (variant == QLatin1String("dark")) {
-        m_ghVariant = Dark;
+        m_githubVariant = Dark;
     } else {
-        m_ghVariant = Auto;
+        m_githubVariant = Auto;
     }
     m_loadRemoteMedia = cfg.readEntry("LoadRemoteMedia", false);
     m_mathMacros = cfg.readEntry("MathMacros", QString());
@@ -41,62 +47,53 @@ void Settings::load()
 
 void Settings::save() const
 {
-    KConfigGroup cfg(KSharedConfig::openConfig(), groupName());
-    cfg.writeEntry("Theme", m_mode == Application ? QStringLiteral("application") : QStringLiteral("github"));
-    const char *variant = m_ghVariant == Light ? "light" : m_ghVariant == Dark ? "dark" : "auto";
-    cfg.writeEntry("GithubVariant", QString::fromLatin1(variant));
+    KConfigGroup cfg(KSharedConfig::openConfig(), GroupName);
+    cfg.writeEntry("Theme", m_colorSource == Application ? QStringLiteral("application") : QStringLiteral("github"));
+    QString variant = QStringLiteral("auto");
+    if (m_githubVariant == Light) {
+        variant = QStringLiteral("light");
+    } else if (m_githubVariant == Dark) {
+        variant = QStringLiteral("dark");
+    }
+    cfg.writeEntry("GithubVariant", variant);
     cfg.writeEntry("LoadRemoteMedia", m_loadRemoteMedia);
     cfg.writeEntry("MathMacros", m_mathMacros);
     cfg.writeEntry("GithubOnly", m_githubOnly);
     cfg.sync();
 }
 
-void Settings::setMode(Mode mode)
+template<typename T>
+void Settings::store(T &member, const T &value)
 {
-    if (m_mode == mode) {
+    if (member == value) {
         return;
     }
-    m_mode = mode;
+    member = value;
     save();
     Q_EMIT changed();
 }
 
-void Settings::setGhVariant(GhVariant variant)
+void Settings::setColorSource(ColorSource source)
 {
-    if (m_ghVariant == variant) {
-        return;
-    }
-    m_ghVariant = variant;
-    save();
-    Q_EMIT changed();
+    store(m_colorSource, source);
+}
+
+void Settings::setGithubVariant(GithubVariant variant)
+{
+    store(m_githubVariant, variant);
 }
 
 void Settings::setLoadRemoteMedia(bool enabled)
 {
-    if (m_loadRemoteMedia == enabled) {
-        return;
-    }
-    m_loadRemoteMedia = enabled;
-    save();
-    Q_EMIT changed();
+    store(m_loadRemoteMedia, enabled);
 }
 
 void Settings::setMathMacros(const QString &macros)
 {
-    if (m_mathMacros == macros) {
-        return;
-    }
-    m_mathMacros = macros;
-    save();
-    Q_EMIT changed();
+    store(m_mathMacros, macros);
 }
 
 void Settings::setGithubOnly(bool enabled)
 {
-    if (m_githubOnly == enabled) {
-        return;
-    }
-    m_githubOnly = enabled;
-    save();
-    Q_EMIT changed();
+    store(m_githubOnly, enabled);
 }

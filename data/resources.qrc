@@ -21,7 +21,7 @@
     <file>js/texmath.js</file>
     <file>js/mermaid.min.js</file>
     <file>js/preview/core.js</file>
-    <file>js/preview/frontmatter.js</file>
+    <file>js/preview/github.js</file>
     <file>js/preview/callouts.js</file>
     <file>js/preview/codimd.js</file>
     <file>js/preview/mkdocs.js</file>

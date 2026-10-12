@@ -16,11 +16,15 @@
 #include <QKeySequence>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QResizeEvent>
 #include <QWebEngineContextMenuRequest>
 #include <QWebEnginePage>
 #include <QWebEngineView>
 
+#include <KActionCollection>
 #include <KTextEditor/MainWindow>
+#include <KXMLGUIClient>
+#include <KXMLGUIFactory>
 
 // QWebEngineView delivers input to a lazily-created internal child (its focus proxy),
 // which can be swapped out across loads. Keep our filter attached to whatever child
@@ -45,6 +49,8 @@ bool PreviewWidget::eventFilter(QObject *obj, QEvent *event)
     if (obj == m_web) {
         if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildPolished) {
             installInputFilter();
+        } else if (event->type() == QEvent::Resize && m_exportCover) {
+            m_exportCover->resize(static_cast<QResizeEvent *>(event)->size());
         }
         return QWidget::eventFilter(obj, event);
     }
@@ -128,15 +134,39 @@ bool PreviewWidget::forwardMouseEvent(QMouseEvent *event)
     return true;
 }
 
-QAction *PreviewWidget::kateActionFor(const QKeySequence &seq) const
+namespace
 {
-    QWidget *win = (seq.isEmpty() || !m_mainWindow) ? nullptr : m_mainWindow->window();
-    if (!win) {
-        return nullptr;
-    }
-    const QList<QAction *> actions = win->findChildren<QAction *>();
+// The enabled action of a GUI client, or of one of its children, that a shortcut triggers.
+QAction *actionFor(KXMLGUIClient *client, const QKeySequence &seq)
+{
+    const QList<QAction *> actions = client->actionCollection()->actions();
     for (QAction *action : actions) {
         if (action->isEnabled() && action->shortcuts().contains(seq)) {
+            return action;
+        }
+    }
+    const QList<KXMLGUIClient *> children = client->childClients();
+    for (KXMLGUIClient *child : children) {
+        if (QAction *action = actionFor(child, seq)) {
+            return action;
+        }
+    }
+    return nullptr;
+}
+} // namespace
+
+// The action of Kate's window that a shortcut triggers. The window's GUI is made of
+// clients: Kate itself, its plugins and the active view. A view that is not shown is not
+// among them, so its actions cannot answer for it.
+QAction *PreviewWidget::kateActionFor(const QKeySequence &seq) const
+{
+    KXMLGUIFactory *factory = (seq.isEmpty() || !m_mainWindow) ? nullptr : m_mainWindow->guiFactory();
+    if (!factory) {
+        return nullptr;
+    }
+    const QList<KXMLGUIClient *> clients = factory->clients();
+    for (KXMLGUIClient *client : clients) {
+        if (QAction *action = actionFor(client, seq)) {
             return action;
         }
     }

@@ -35,6 +35,14 @@ public:
         m_allowRemote = allow;
     }
 
+    // Whether a local file lies in the document folder. The HTML export asks too, before
+    // it copies a picture into the exported file.
+    bool allows(const QString &localFile) const
+    {
+        const QString path = QFileInfo(localFile).canonicalFilePath();
+        return !m_root.isEmpty() && !path.isEmpty() && (path == m_root || path.startsWith(m_root + QLatin1Char('/')));
+    }
+
     void interceptRequest(QWebEngineUrlRequestInfo &info) override
     {
         const QUrl url = info.requestUrl();
@@ -43,9 +51,7 @@ public:
             return;
         }
         if (scheme == QLatin1String("file")) {
-            const QString path = QFileInfo(url.toLocalFile()).canonicalFilePath();
-            const bool ok = !m_root.isEmpty() && !path.isEmpty() && (path == m_root || path.startsWith(m_root + QLatin1Char('/')));
-            if (!ok) {
+            if (!allows(url.toLocalFile())) {
                 info.block(true);
             }
             return;
@@ -62,8 +68,9 @@ private:
     bool m_allowRemote = false;
 };
 
-// Keep link clicks from turning the preview into a browser: same-document anchors
-// scroll in place; everything else is handed back to the host via onLinkActivated.
+// Keep the preview from turning into a browser: same-document anchors scroll in place,
+// other clicked links are handed back to the host via onLinkActivated, and nothing else
+// may take the page elsewhere.
 class PreviewPage : public QWebEnginePage
 {
 public:
@@ -80,10 +87,16 @@ public:
             }
             if (onLinkActivated) {
                 QMetaObject::invokeMethod(
-                    this, [cb = onLinkActivated, u = url]() { cb(u); }, Qt::QueuedConnection);
+                    this,
+                    [callback = onLinkActivated, target = url]() {
+                        callback(target);
+                    },
+                    Qt::QueuedConnection);
             }
             return false;
         }
-        return true;
+        // Typed is the page itself, loaded by setHtml(). The rest (a redirect, a form, a
+        // reload) is not asked by the preview: <meta http-equiv="refresh"> in a document is.
+        return type == NavigationTypeTyped;
     }
 };

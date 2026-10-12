@@ -2,6 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- Script comes from the plugin alone. A document may hold raw HTML: its event
+         handlers, javascript: links, frames, forms and <base> are refused. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src qrc:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="qrc:/katemark/css/katex.min.css" />
     <style id="ghmd">/*__GHMD_CSS__*/</style>
@@ -9,9 +15,20 @@
     <style id="hljs-gh">/*__HLJS_LIGHT__*/</style>
     <style id="hljs-ghd">/*__HLJS_DARK__*/</style>
     <style id="hljs-generated"></style>
-    <script>/*__MARKDOWN_IT__*/</script>
-    <script>/*__HLJS_JS__*/</script>
-    <script>/*__JS_YAML__*/</script>
+    <!-- PDF export: each page is numbered at its foot, "1 / 3". Not in base.css, which
+         the HTML export carries too. -->
+    <style>
+      @page {
+        @bottom-center {
+          content: counter(page) " / " counter(pages);
+          color: #57606a;
+          font: 9pt sans-serif;
+        }
+      }
+    </style>
+    <script src="qrc:/katemark/js/markdown-it.min.js"></script>
+    <script src="qrc:/katemark/js/highlight.min.js"></script>
+    <script src="qrc:/katemark/js/js-yaml.min.js"></script>
     <script src="qrc:/katemark/js/markdown-it-container.min.js"></script>
     <script src="qrc:/katemark/js/markdown-it-mark.min.js"></script>
     <script src="qrc:/katemark/js/markdown-it-ins.min.js"></script>
@@ -22,7 +39,7 @@
     <script src="qrc:/katemark/js/katex.min.js"></script>
     <script src="qrc:/katemark/js/texmath.js"></script>
     <script src="qrc:/katemark/js/preview/core.js"></script>
-    <script src="qrc:/katemark/js/preview/frontmatter.js"></script>
+    <script src="qrc:/katemark/js/preview/github.js"></script>
     <script src="qrc:/katemark/js/preview/callouts.js"></script>
     <script src="qrc:/katemark/js/preview/codimd.js"></script>
     <script src="qrc:/katemark/js/preview/mkdocs.js"></script>
@@ -31,7 +48,7 @@
     <script src="qrc:/katemark/js/preview/mermaid.js"></script>
     <script src="qrc:/katemark/js/preview/scroll.js"></script>
     <script src="qrc:/katemark/js/preview/media.js"></script>
-    <script>/*__PREVIEW_JS__*/</script>
+    <script src="qrc:/katemark/js/preview.js"></script>
   </head>
   <body>
     <article class="markdown-body" id="content"></article>

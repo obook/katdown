@@ -15,16 +15,16 @@
 
   // Finished SVGs by diagram source. The preview re-renders on every edit; without this
   // each diagram would drop back to its source text and be laid out again every time.
-  var mermaidSvg = new Map();
+  var svgBySource = new Map();
 
   // Number given to the next diagram: Mermaid wants a distinct id for each drawing.
-  var mermaidSeq = 0;
+  var diagramNumber = 0;
 
   // Diagrams being drawn right now; an export waits until there are none.
   var mermaidPending = 0;
   // Counts the changes of color scheme. A drawing started under an earlier scheme has
   // the wrong colors and is dropped when it arrives.
-  var mermaidScheme = 0;
+  var schemeChangeCount = 0;
 
   // Mermaid measures labels on document.body and draws them in the article:
   // same font both sides, or the text is clipped. base.css sets it on
@@ -60,21 +60,21 @@
   // under the source when Mermaid rejects it. The block may be gone by then, replaced
   // by a newer render: isConnected tells whether it is still in the page.
   function renderDiagram(block, source) {
-    var scheme = mermaidScheme;
+    var changesAtStart = schemeChangeCount;
     mermaidPending++;
     loadMermaid()
       .then(function () {
-        return window.mermaid.render("katemark-mermaid-" + ++mermaidSeq, source);
+        return window.mermaid.render("katemark-mermaid-" + ++diagramNumber, source);
       })
       .finally(function () {
         mermaidPending--;
       })
       .then(
         function (diagram) {
-          if (scheme !== mermaidScheme) {
+          if (changesAtStart !== schemeChangeCount) {
             return;
           }
-          mermaidSvg.set(source, diagram.svg);
+          svgBySource.set(source, diagram.svg);
           if (block.isConnected) {
             block.innerHTML = diagram.svg;
           }
@@ -89,12 +89,12 @@
   }
 
   function drawMermaid(article) {
-    var previous = mermaidSvg;
-    mermaidSvg = new Map(); // keep only the diagrams still in the document
+    var previous = svgBySource;
+    svgBySource = new Map(); // keep only the diagrams still in the document
     article.querySelectorAll("pre.mermaid").forEach(function (block) {
       var source = block.textContent;
       if (previous.has(source)) {
-        mermaidSvg.set(source, previous.get(source));
+        svgBySource.set(source, previous.get(source));
         block.innerHTML = previous.get(source);
       } else {
         renderDiagram(block, source);
@@ -114,8 +114,8 @@
       return false;
     }
     configureMermaid();
-    mermaidSvg.clear();
-    mermaidScheme++;
+    svgBySource.clear();
+    schemeChangeCount++;
     return true;
   }
 

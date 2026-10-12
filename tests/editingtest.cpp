@@ -1,5 +1,9 @@
+// editingtest.cpp
 // The editing helpers work on the text of a document: no preview is involved, only an
 // editor view.
+// Author: Olivier Booklage
+// Date: October 2026
+// License: GPL-3.0-or-later
 
 #include "markdownedit.h"
 
@@ -88,6 +92,12 @@ void EditingTest::shiftsHeadingLevels()
     m_view->setCursorPosition(KTextEditor::Cursor(0, 0));
     shiftHeadingLevel(m_view, 1); // Markdown stops at six levels
     QCOMPARE(m_doc->text(), QStringLiteral("###### Six"));
+
+    // Two whole lines selected end at the start of the third, which is not selected.
+    m_doc->setText(QStringLiteral("one\ntwo\nthree"));
+    m_view->setSelection(KTextEditor::Range(0, 0, 2, 0));
+    shiftHeadingLevel(m_view, 1);
+    QCOMPARE(m_doc->text(), QStringLiteral("# one\n# two\nthree"));
 }
 
 void EditingTest::pastesLinkOnSelection()

@@ -20,8 +20,11 @@
   // The one options object handed to KaTeX for every formula.
   var mathOptions = { globalGroup: true, macros: macros, throwOnError: false };
 
+  // Returns whether the macros changed.
   function setGlobalMacros(tex) {
+    var changed = tex !== globalMacros;
     globalMacros = tex;
+    return changed;
   }
 
   // MathJax lets \newcommand redefine a command that exists. KaTeX refuses, and it
@@ -57,7 +60,12 @@
     macros["\\newcommand"] = lenientNewcommand;
     if (globalMacros) {
       // The output is thrown away: only the definitions it leaves in "macros" matter.
-      window.katex.renderToString(globalMacros, mathOptions);
+      try {
+        window.katex.renderToString(globalMacros, mathOptions);
+      } catch (e) {
+        // A line KaTeX cannot read ("\\newcommand{}{x}") leaves its macro undefined. It
+        // must not keep every document from rendering.
+      }
     }
   }
 
@@ -80,13 +88,46 @@
     dollars.block[0].rex = /\${2}((?:[^$]|\$(?!\$))*?[^\\])\${2}[ \t]*\(([^)\s]+?)\)/gmy;
     brackets.block[0].rex = /\\\[(((?!\\\]|\\\[)[\s\S])+?)\\\][ \t]*\(([^)$\r\n]+?)\)/gmy;
 
+    // MathJax shows a "$" met inside a formula as a dollar sign; KaTeX wants "\$". Inside
+    // \text{...} the "$" stays: there it opens a formula again, as in LaTeX.
+    var TEXT_GROUP = /\\(?:text[a-z]*|mbox)\s*\{/y;
+
+    function escapeDollars(tex) {
+      var result = "";
+      var textDepth = 0; // braces open inside a \text{...}, 0 outside of one
+      for (var i = 0; i < tex.length; i++) {
+        var character = tex[i];
+        if (character === "\\") {
+          TEXT_GROUP.lastIndex = i;
+          var opening = textDepth === 0 ? TEXT_GROUP.exec(tex) : null;
+          if (opening) {
+            result += opening[0];
+            i += opening[0].length - 1;
+            textDepth = 1;
+          } else {
+            // A command or an escaped character: "\$" is already what KaTeX wants.
+            result += character + (tex[i + 1] || "");
+            i++;
+          }
+          continue;
+        }
+        if (textDepth > 0) {
+          if (character === "{") {
+            textDepth++;
+          } else if (character === "}") {
+            textDepth--;
+          }
+        } else if (character === "$") {
+          result += "\\";
+        }
+        result += character;
+      }
+      return result;
+    }
+
     function toKatex(tex) {
       // \require{...} loads a MathJax extension; KaTeX has those built in.
-      var withoutRequire = tex.replace(/\\require\s*\{[^}]*\}/g, "");
-      // MathJax shows a "$" met inside a formula as a dollar sign; KaTeX wants "\$".
-      return withoutRequire.replace(/(^|[^\\])\$/g, function (all, before) {
-        return before + "\\$";
-      });
+      return escapeDollars(tex.replace(/\\require\s*\{[^}]*\}/g, ""));
     }
 
     return {

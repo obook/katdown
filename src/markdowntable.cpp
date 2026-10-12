@@ -18,6 +18,9 @@ namespace
 // A table column is never narrower than its delimiter, "---".
 constexpr int MinColumnWidth = 3;
 
+// The delimiter row is the second row of a table, right under its header.
+constexpr int DelimiterRow = 1;
+
 // The cells of one table row, without the outer pipes. A pipe written "\|" stays in its
 // cell: (?<!\\) means "not preceded by a backslash".
 QStringList splitRow(const QString &line)
@@ -80,31 +83,32 @@ QString padDelimiter(int width, const QString &delimiter)
     return dashes;
 }
 
+// The lines of the table, each cell padded to the width of its column.
 // ponytail: widths are counted in characters, so a column holding wide characters
 // (Chinese, Japanese, emoji) comes out ragged. Count display cells if that matters.
 QStringList alignedRows(QList<QStringList> rows, const QString &indent)
 {
-    int columns = 0;
-    for (const QStringList &row : rows) {
-        columns = qMax(columns, int(row.size()));
+    int columnCount = 0;
+    for (const QStringList &rowCells : rows) {
+        columnCount = qMax(columnCount, int(rowCells.size()));
     }
-    QList<int> widths(columns, MinColumnWidth);
-    for (int r = 0; r < rows.size(); ++r) {
-        rows[r].resize(columns); // a short row gets empty cells
-        if (r == 1) {
+    QList<int> widths(columnCount, MinColumnWidth);
+    for (int row = 0; row < rows.size(); ++row) {
+        rows[row].resize(columnCount); // a short row gets empty cells
+        if (row == DelimiterRow) {
             continue; // the delimiter row adapts to the others
         }
-        for (int c = 0; c < columns; ++c) {
-            widths[c] = qMax(widths[c], int(rows[r][c].size()));
+        for (int column = 0; column < columnCount; ++column) {
+            widths[column] = qMax(widths[column], int(rows[row][column].size()));
         }
     }
-    const QStringList delimiters = rows[1];
+    const QStringList delimiters = rows[DelimiterRow];
     QStringList lines;
-    for (int r = 0; r < rows.size(); ++r) {
+    for (int row = 0; row < rows.size(); ++row) {
         QStringList cells;
-        for (int c = 0; c < columns; ++c) {
-            const QString delimiter = delimiters[c].isEmpty() ? QStringLiteral("---") : delimiters[c];
-            cells << (r == 1 ? padDelimiter(widths[c], delimiter) : padCell(rows[r][c], widths[c], delimiter));
+        for (int column = 0; column < columnCount; ++column) {
+            const QString delimiter = delimiters[column].isEmpty() ? QStringLiteral("---") : delimiters[column];
+            cells << (row == DelimiterRow ? padDelimiter(widths[column], delimiter) : padCell(rows[row][column], widths[column], delimiter));
         }
         lines << indent + QStringLiteral("| ") + cells.join(QStringLiteral(" | ")) + QStringLiteral(" |");
     }
@@ -135,7 +139,7 @@ bool formatTableAtCursor(KTextEditor::View *view)
     for (int line = first; line <= last; ++line) {
         rows << splitRow(doc->line(line));
     }
-    if (rows.size() < 2 || !isDelimiterRow(rows[1])) {
+    if (rows.size() <= DelimiterRow || !isDelimiterRow(rows[DelimiterRow])) {
         return false;
     }
     // A table inside a list item is indented: keep the indentation of its first row.

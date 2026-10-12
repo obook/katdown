@@ -21,34 +21,34 @@ namespace
 // A Markdown heading has at most six levels.
 constexpr int MaxHeadingLevel = 6;
 
-// How many times the character c is repeated just before the column.
-int runBefore(const QString &line, int column, QChar c)
+// How many times the character is repeated just before the column.
+int repeatCountBefore(const QString &line, int column, QChar character)
 {
     int count = 0;
-    while (column - count - 1 >= 0 && line.at(column - count - 1) == c) {
+    while (column - count - 1 >= 0 && line.at(column - count - 1) == character) {
         ++count;
     }
     return count;
 }
 
-// How many times the character c is repeated from the column on.
-int runAfter(const QString &line, int column, QChar c)
+// How many times the character is repeated from the column on.
+int repeatCountAfter(const QString &line, int column, QChar character)
 {
     int count = 0;
-    while (column + count < line.size() && line.at(column + count) == c) {
+    while (column + count < line.size() && line.at(column + count) == character) {
         ++count;
     }
     return count;
 }
 
-// Whether a run of marker characters holds the marker. "*" (italic) is there when the
-// run is odd: one star, or three with bold. A two-character marker needs two of them.
-bool runHoldsMarker(int run, const QString &marker)
+// Whether that many marker characters in a row hold the marker. "*" (italic) is there when
+// the count is odd: one star, or three with bold. A two-character marker needs two of them.
+bool repeatsHoldMarker(int repeatCount, const QString &marker)
 {
     if (marker.size() == 1) {
-        return run % 2 == 1;
+        return repeatCount % 2 == 1;
     }
-    return run >= marker.size();
+    return repeatCount >= marker.size();
 }
 
 } // namespace
@@ -76,9 +76,10 @@ void toggleInlineMarker(KTextEditor::View *view, const QString &marker)
 
     // All the changes below count as one for undo.
     KTextEditor::Document::EditingTransaction transaction(doc);
-    const bool markedOutside = runHoldsMarker(runBefore(lineText, start, markerChar), marker) && runHoldsMarker(runAfter(lineText, end, markerChar), marker);
-    const bool markedInside = text.size() > 2 * size && runHoldsMarker(runAfter(text, 0, markerChar), marker)
-        && runHoldsMarker(runBefore(text, text.size(), markerChar), marker);
+    const bool markedOutside = repeatsHoldMarker(repeatCountBefore(lineText, start, markerChar), marker)
+        && repeatsHoldMarker(repeatCountAfter(lineText, end, markerChar), marker);
+    const bool markedInside = text.size() > 2 * size && repeatsHoldMarker(repeatCountAfter(text, 0, markerChar), marker)
+        && repeatsHoldMarker(repeatCountBefore(text, text.size(), markerChar), marker);
     if (markedOutside) {
         // The markers sit around the range: take them off and keep the text selected.
         doc->replaceText(KTextEditor::Range(line, start - size, line, end + size), text);
@@ -99,13 +100,18 @@ void toggleInlineMarker(KTextEditor::View *view, const QString &marker)
 
 void shiftHeadingLevel(KTextEditor::View *view, int delta)
 {
-    static const QRegularExpression heading(QStringLiteral("^(#{1,6})[ \\t]+"));
+    static const QRegularExpression heading(QStringLiteral("^(#{1,%1})[ \\t]+").arg(MaxHeadingLevel));
     KTextEditor::Document *doc = view->document();
     int first = view->cursorPosition().line();
     int last = first;
     if (view->selection()) {
-        first = view->selectionRange().start().line();
-        last = view->selectionRange().end().line();
+        const KTextEditor::Range selection = view->selectionRange();
+        first = selection.start().line();
+        last = selection.end().line();
+        // Whole lines selected end at column 0 of the next one, which is not selected.
+        if (selection.end().column() == 0 && last > first) {
+            --last;
+        }
     }
 
     KTextEditor::Document::EditingTransaction transaction(doc);

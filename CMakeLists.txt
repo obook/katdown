@@ -28,6 +28,7 @@ find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
     CoreAddons
     I18n
     Config
+    WidgetsAddons
     XmlGui
     SyntaxHighlighting
 )
@@ -70,6 +71,7 @@ target_link_libraries(katemark PRIVATE
     KF6::CoreAddons
     KF6::I18n
     KF6::ConfigCore
+    KF6::WidgetsAddons
     KF6::XmlGui
     KF6::SyntaxHighlighting
 )

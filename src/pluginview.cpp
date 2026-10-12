@@ -1,13 +1,19 @@
+// pluginview.cpp
+// PluginView: the tool view, the preview it holds and the export actions.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #include "pluginview.h"
+#include "previewutil.h"
 #include "previewwidget.h"
 
 #include <QAction>
 #include <QEvent>
-#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QIcon>
 #include <QKeySequence>
+#include <QLabel>
 
 #include <KActionCollection>
 #include <KLocalizedString>
@@ -19,14 +25,8 @@
 
 namespace
 {
-QString readUiRc()
-{
-    QFile f(QStringLiteral(":/katemark/ui.rc"));
-    if (!f.open(QIODevice::ReadOnly)) {
-        return QString();
-    }
-    return QString::fromUtf8(f.readAll());
-}
+// Space around the text shown in the empty panel.
+constexpr int HintMarginPx = 16;
 } // namespace
 
 // A document is Markdown by its highlighting mode, or by its file extension when the
@@ -52,28 +52,34 @@ PluginView::PluginView(KTextEditor::Plugin *plugin, KTextEditor::MainWindow *mai
     m_toolView = m_mainWindow->createToolView(plugin, QStringLiteral("katemark"), KTextEditor::MainWindow::Right, icon, i18n("Markdown Preview"));
     // Kate has no signal for a tool view being shown; its Show event is the cue.
     m_toolView->installEventFilter(this);
+    // The preview comes with the first Markdown document. Until then the panel would be
+    // blank, with nothing to tell a new document from a broken plugin.
+    auto *hint = new QLabel(i18n("No Markdown document yet. Save this one as .md, or set its mode to Markdown."), m_toolView);
+    hint->setWordWrap(true);
+    hint->setAlignment(Qt::AlignCenter);
+    hint->setMargin(HintMarginPx);
+    m_hint = hint;
 
     QAction *toggle = addAction(QStringLiteral("katemark_show"), i18n("Preview"), icon);
     toggle->setToolTip(i18n("Show or hide the Markdown preview beside the editor"));
     actionCollection()->setDefaultShortcut(toggle, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M));
     connect(toggle, &QAction::triggered, this, &PluginView::togglePreview);
 
-    // An export writes what the preview shows, so both are only offered while it shows.
     m_exportPdf = addAction(QStringLiteral("katemark_export_pdf"), i18n("Export Preview as PDF..."), QIcon::fromTheme(QStringLiteral("application-pdf")));
     // What a toolbar shows beside the icon; the menu keeps the full text.
     m_exportPdf->setIconText(QStringLiteral("PDF"));
     connect(m_exportPdf, &QAction::triggered, this, [this]() {
-        exportPreview(true);
+        exportPreview(ExportFormat::Pdf);
     });
     m_exportHtml = addAction(QStringLiteral("katemark_export_html"), i18n("Export Preview as HTML..."), QIcon::fromTheme(QStringLiteral("text-html")));
     m_exportHtml->setIconText(QStringLiteral("HTML"));
     connect(m_exportHtml, &QAction::triggered, this, [this]() {
-        exportPreview(false);
+        exportPreview(ExportFormat::Html);
     });
-    onToolViewShown(false);
+    applyToolViewVisibility(false);
     addEditActions();
 
-    setXML(readUiRc());
+    setXML(readAsset(QStringLiteral(":/katemark/ui.rc")));
 
     m_mainWindow->guiFactory()->addClient(this);
 
@@ -99,25 +105,31 @@ PluginView::~PluginView()
 bool PluginView::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == m_toolView && event->type() == QEvent::Show) {
-        onToolViewShown(true);
+        applyToolViewVisibility(true);
         // Queued, not direct: building the preview's QWebEngineView makes Qt recreate
         // the window, which re-delivers Show to the tool view in the middle of that
         // construction and would build a second preview.
         QMetaObject::invokeMethod(this, &PluginView::syncPreview, Qt::QueuedConnection);
     } else if (obj == m_toolView && event->type() == QEvent::Hide) {
-        onToolViewShown(false);
+        applyToolViewVisibility(false);
     }
     return QObject::eventFilter(obj, event);
 }
 
-void PluginView::onToolViewShown(bool shown)
+// An export writes what the preview shows, so the exports are offered while it shows: once
+// a Markdown document has been shown in the panel, and one export at a time.
+void PluginView::setExportsOffered(bool toolViewVisible)
 {
-    // Nothing to export until a Markdown document has been shown in the panel.
-    const bool canExport = shown && m_preview;
-    m_exportPdf->setEnabled(canExport);
-    m_exportHtml->setEnabled(canExport);
+    const bool offered = toolViewVisible && m_preview && !m_preview->isExporting();
+    m_exportPdf->setEnabled(offered);
+    m_exportHtml->setEnabled(offered);
+}
+
+void PluginView::applyToolViewVisibility(bool visible)
+{
+    setExportsOffered(visible);
     if (m_preview) {
-        m_preview->setPaused(!shown);
+        m_preview->setPaused(!visible);
     }
 }
 
@@ -143,11 +155,12 @@ void PluginView::onViewChanged(KTextEditor::View *view)
     syncPreview();
 }
 
-void PluginView::exportPreview(bool pdf)
+void PluginView::exportPreview(ExportFormat format)
 {
     if (!m_preview) {
         return; // the panel is open but no Markdown document was ever shown in it
     }
+    const bool pdf = format == ExportFormat::Pdf;
     // Suggest the document's own name and folder, with the export's extension.
     const QFileInfo source(m_preview->documentUrl().toLocalFile());
     QString suggested = i18n("Untitled");
@@ -167,11 +180,17 @@ void PluginView::exportPreview(bool pdf)
     } else {
         m_preview->exportHtml(path);
     }
+    setExportsOffered(m_toolView->isVisible()); // not again until this one has ended
 }
 
 void PluginView::onExported(const QString &path, bool ok)
 {
-    showMessage(ok ? i18n("Preview exported to %1", path) : i18n("Could not export the preview to %1", path), !ok);
+    setExportsOffered(m_toolView->isVisible());
+    if (ok) {
+        showMessage(i18n("Preview exported to %1", path), false, path);
+    } else {
+        showMessage(i18n("Could not export the preview to %1", path), true);
+    }
 }
 
 void PluginView::togglePreview()
@@ -195,9 +214,10 @@ void PluginView::syncPreview()
     if (m_preview) {
         m_preview->attachDocument(view->document(), view);
     } else {
+        delete m_hint;
         m_preview = new PreviewWidget(m_mainWindow, view, view->document(), m_toolView);
         connect(m_preview, &PreviewWidget::exported, this, &PluginView::onExported);
         m_preview->addExportActions({m_exportPdf, m_exportHtml});
-        onToolViewShown(true);
+        applyToolViewVisibility(true);
     }
 }

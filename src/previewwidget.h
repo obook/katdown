@@ -1,3 +1,8 @@
+// previewwidget.h
+// PreviewWidget: the Markdown preview, a bar above a web view.
+// Code by uwuclxdy and Olivier Booklage.
+// License: GPL-3.0-or-later
+
 #pragma once
 
 #include <QPointer>
@@ -9,9 +14,9 @@
 #include <KTextEditor/Document>
 #include <KTextEditor/View>
 
+class LocalFileGuard;
 class QWebEngineView;
 class QWebEngineProfile;
-class QWebEngineUrlRequestInterceptor;
 class QTimer;
 class QToolBar;
 class QAction;
@@ -26,13 +31,13 @@ class MainWindow;
 }
 
 /**
- * The Markdown preview: a QWebEngineView fed by a self-contained HTML document.
- * Source text is pushed to the page on every change; theming is driven from the
- * active editor theme (Application mode) or GitHub's palette.
+ * The Markdown preview: a QWebEngineView showing a self-contained HTML page. The widget
+ * pushes the text to it on every change and takes its colors from the editor theme or
+ * GitHub's palette.
  *
  * The widget outlives its document: Kate destroys the document when its editor tab
- * closes, so the source text and url are mirrored here and the preview keeps showing
- * that copy until it is attached to another document.
+ * closes, so the widget keeps a copy of the text and url and shows it until it gets
+ * another document.
  */
 class PreviewWidget : public QWidget
 {
@@ -54,9 +59,14 @@ public:
     void setPaused(bool paused);
 
     // Write the rendered document to a file, in GitHub's light look whatever the preview
-    // shows: a dark page makes a poor printout. Both finish with exported().
+    // shows: a dark page makes a poor printout. Both finish with exported(). One export
+    // runs at a time; a second one asked meanwhile fails at once.
     void exportPdf(const QString &path);
     void exportHtml(const QString &path);
+    bool isExporting() const
+    {
+        return !m_exportPath.isEmpty();
+    }
 
     // The export actions belong to the window. They are offered in the bar above the
     // preview and in its context menu.
@@ -80,41 +90,58 @@ private Q_SLOTS:
     void syncFromPreview();
 
 private:
+    // previewwidget.cpp
+    void createBar();
+    void createWebView();
+    void onLoadFinished(bool ok);
     void render();
-    void applyGithubLook(bool dark);
     void applyMacros();
     void applySyntax();
-    // 50 checks, 100 ms apart: an export waits at most 5 s for the page.
-    void whenSettled(std::function<void()> then, int checksLeft = 50);
-    void setView(KTextEditor::View *view);
     void runJs(const QString &code);
-    void loadPage();
     void openLink(const QUrl &url);
+
+    // previewtheme.cpp
+    void applyGithubLook(bool dark);
+
+    // previewexport.cpp
+    bool beginExport(const QString &path);
+    void endExport(bool ok);
+    void whenSettled(std::function<void()> then, int checksLeft);
+
+    // previewload.cpp
+    void loadPage();
     void applyMediaPolicy();
     QUrl baseUrl() const;
     static QString buildHtml();
 
-    // Forward input the preview doesn't use back to Kate: QWebEngineView's render
-    // widget swallows keys/mouse buttons before Kate's shortcut machinery sees them.
+    // previewscroll.cpp
+    void setView(KTextEditor::View *view);
+
+    // previewinput.cpp. QWebEngineView's render widget swallows keys and mouse buttons
+    // before Kate's shortcut machinery sees them: those the preview does not use go back
+    // to Kate.
     void installInputFilter();
-    void showContextMenu(const QPoint &position);
     bool forwardKeyEvent(QKeyEvent *event);
     bool forwardMouseEvent(QMouseEvent *event);
     QAction *kateActionFor(const QKeySequence &seq) const;
+    void showContextMenu(const QPoint &position);
 
     QPointer<KTextEditor::MainWindow> m_mainWindow;
     QWebEngineView *m_web = nullptr;
     QToolBar *m_bar = nullptr;
-    QCheckBox *m_githubOnly = nullptr;
+    QCheckBox *m_githubOnlyBox = nullptr;
     QWebEngineProfile *m_profile = nullptr;
-    QWebEngineUrlRequestInterceptor *m_guard = nullptr;
+    LocalFileGuard *m_guard = nullptr;
     QTimer *m_debounce = nullptr;
     QPointer<KTextEditor::Document> m_doc;
     QPointer<KTextEditor::View> m_view;
     QPointer<QWidget> m_inputTarget;
+    QPointer<QWidget> m_exportCover; // a picture of the page, over it during an export
+    QString m_exportPath; // the file being written, empty when no export runs
+    int m_exportRun = 0; // counts the exports: a cover is removed by the one that put it
     QUrl m_url;
     QString m_text;
     bool m_paused = false;
     bool m_loaded = false;
-    bool m_remoteApplied = false;
+    bool m_pageAllowsRemoteMedia = false; // the setting the page was loaded with
 };

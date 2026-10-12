@@ -10,11 +10,9 @@
   "use strict";
 
   var katemark = window.katemark;
-  var slugify = katemark.slugify;
 
-  // CodiMD alert areas (:::success / :::info / :::warning / :::danger) under their
-  // Docusaurus names too, with an optional title (":::info Title" or ":::info[Title]"),
-  // and :::spoiler as a collapsible block.
+  // The alert areas answer to their Docusaurus names too and take an optional title
+  // (":::info Title" or ":::info[Title]"); :::spoiler is a collapsible block.
   function codimdContainers(md) {
     // Name written in the document -> one of the four alert colors.
     var KINDS = {
@@ -87,32 +85,6 @@
   // Indentation of a table-of-contents entry, per heading level below the first.
   var TOC_INDENT_EM = 1.5;
 
-  // Give every heading an id made from its title, so that #anchor links, wiki links to a
-  // heading and the table of contents can point at it. A repeated title gets a number.
-  function assignHeadingIds(headings) {
-    // Ids already taken, starting with the ones the author wrote in raw HTML: those stay.
-    var taken = new Set();
-    headings.forEach(function (heading) {
-      if (heading.id) {
-        taken.add(heading.id);
-      }
-    });
-    headings.forEach(function (heading) {
-      if (heading.id) {
-        return;
-      }
-      var slug = slugify(heading.textContent) || "section";
-      // A repeated title gets "-1", "-2"... until the id is free: "Setup" twice and
-      // "Setup 1" once must still give three different ids.
-      var id = slug;
-      for (var copy = 1; taken.has(id); copy++) {
-        id = slug + "-" + copy;
-      }
-      taken.add(id);
-      heading.id = id;
-    });
-  }
-
   function buildToc(headings, maxLevel) {
     var list = document.createElement("ul");
     list.className = "toc";
@@ -132,13 +104,10 @@
     return list;
   }
 
-  // The headings get their ids in every case; [TOC] is only replaced when withToc is set.
-  function fillToc(article, withToc) {
+  // Replace each [TOC] by the list of the headings, which have their ids by then (see
+  // assignHeadingIds in core.js).
+  function fillToc(article) {
     var headings = article.querySelectorAll("h1,h2,h3,h4,h5,h6");
-    assignHeadingIds(headings);
-    if (!withToc) {
-      return;
-    }
     article.querySelectorAll("p").forEach(function (paragraph) {
       var match = TOC.exec(paragraph.textContent.trim());
       if (match) {
