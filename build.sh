@@ -13,9 +13,9 @@ set -euo pipefail
 
 # Packages to install before building, under their KDE neon names. Other
 # distributions name them differently.
-readonly BUILD_PACKAGES="g++ cmake extra-cmake-modules gettext dpkg-dev \
+readonly BUILD_PACKAGES="g++ cmake extra-cmake-modules gettext dpkg-dev poppler-utils \
 qt6-webengine-dev kf6-ktexteditor-dev kf6-kcoreaddons-dev kf6-ki18n-dev \
-kf6-kconfig-dev kf6-kxmlgui-dev kf6-syntax-highlighting-dev"
+kf6-kconfig-dev kf6-kxmlgui-dev kf6-kwidgetsaddons-dev kf6-syntax-highlighting-dev"
 
 # Programs the steps below call.
 readonly BUILD_TOOLS="cmake cpack ctest g++ msgfmt dpkg-shlibdeps"
@@ -62,9 +62,10 @@ compile() {
     cmake --build "${build_dir}" --parallel "$(nproc)"
 }
 
-# A package is only made from a build whose tests pass.
+# A package is only made from a build whose tests pass. A bare ctest succeeds when it
+# finds no test to run, hence --no-tests=error.
 run_tests() {
-    if ! ctest --test-dir "${build_dir}" --output-on-failure; then
+    if ! ctest --test-dir "${build_dir}" --output-on-failure --no-tests=error; then
         fail "the tests failed; no package was made."
     fi
 }

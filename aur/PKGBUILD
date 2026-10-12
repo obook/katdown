@@ -10,7 +10,7 @@ pkgdesc="GitHub-styled live Markdown preview for Kate (KTextEditor/KF6)"
 arch=('x86_64')
 url="https://github.com/obook/katemark"
 license=('GPL-3.0-or-later')
-depends=('ktexteditor' 'syntax-highlighting' 'kxmlgui' 'kconfig' 'ki18n' 'kcoreaddons' 'qt6-base' 'qt6-webengine')
+depends=('ktexteditor' 'syntax-highlighting' 'kxmlgui' 'kwidgetsaddons' 'kconfig' 'ki18n' 'kcoreaddons' 'qt6-base' 'qt6-webengine')
 makedepends=('git' 'cmake' 'extra-cmake-modules')
 provides=('katemark')
 conflicts=('katemark')
@@ -30,7 +30,8 @@ build() {
   cd "$srcdir/$_pkgbase"
   cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-    -DCMAKE_INSTALL_PREFIX=/usr
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_TESTING=OFF
   cmake --build build
 }
 
