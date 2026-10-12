@@ -31,7 +31,38 @@ private Q_SLOTS:
     void runsOneExportAtATime();
     void endsAnExportWhenThePageReloads();
     void numbersThePagesOfAPdf();
+    void leavesASinglePageUnnumbered();
+
+private:
+    void readPdf(const QString &path, QString *text, QStringList *pageNumbers, QString *total);
 };
+
+// The text of a PDF, and the page numbers found at the foot of its pages, "1 / 3": the
+// first figure of each, and the total they announce. Skips the test when the PDF cannot be
+// read back or when this Chromium does not number pages.
+void ExportTest::readPdf(const QString &path, QString *text, QStringList *pageNumbers, QString *total)
+{
+    const QString pdftotext = QStandardPaths::findExecutable(QStringLiteral("pdftotext"));
+    if (pdftotext.isEmpty()) {
+        QSKIP("pdftotext is needed to read the PDF back");
+    }
+    if (QVersionNumber::fromString(QLatin1String(qWebEngineChromiumVersion())).majorVersion() < 131) {
+        QSKIP("page numbers need the Chromium of Qt 6.10 or later");
+    }
+    QProcess reader;
+    reader.start(pdftotext, {path, QStringLiteral("-")});
+    QVERIFY(reader.waitForFinished(ExportTimeoutMs));
+    *text = QString::fromUtf8(reader.readAllStandardOutput());
+
+    // pdftotext drops the spaces around the stroke.
+    static const QRegularExpression pageNumber(QStringLiteral("(\\d+) ?/ ?(\\d+)"));
+    QRegularExpressionMatchIterator found = pageNumber.globalMatch(*text);
+    while (found.hasNext()) {
+        const QRegularExpressionMatch number = found.next();
+        *pageNumbers += number.captured(1);
+        *total = number.captured(2);
+    }
+}
 
 // Both exports end with exported(); the files have to hold the rendered document, and the
 // HTML one must stand alone and be harmless: no script, nothing that sends the reader
@@ -215,14 +246,6 @@ void ExportTest::endsAnExportWhenThePageReloads()
 // pdftotext reads the document and the numbers back.
 void ExportTest::numbersThePagesOfAPdf()
 {
-    const QString pdftotext = QStandardPaths::findExecutable(QStringLiteral("pdftotext"));
-    if (pdftotext.isEmpty()) {
-        QSKIP("pdftotext is needed to read the PDF back");
-    }
-    if (QVersionNumber::fromString(QLatin1String(qWebEngineChromiumVersion())).majorVersion() < 131) {
-        QSKIP("page numbers need the Chromium of Qt 6.10 or later");
-    }
-
     const std::unique_ptr<KTextEditor::Document> doc(KTextEditor::Editor::instance()->createDocument(nullptr));
     QString text;
     for (int i = 0; i < 200; ++i) {
@@ -237,25 +260,55 @@ void ExportTest::numbersThePagesOfAPdf()
     preview->exportPdf(path);
     QVERIFY(exported.wait(ExportTimeoutMs));
 
-    QProcess reader;
-    reader.start(pdftotext, {path, QStringLiteral("-")});
-    QVERIFY(reader.waitForFinished(ExportTimeoutMs));
-    const QString read = QString::fromUtf8(reader.readAllStandardOutput());
-    QVERIFY(read.contains(QLatin1String("paragraph 199")));
-
-    // pdftotext drops the spaces around the stroke.
-    static const QRegularExpression pageNumber(QStringLiteral("(\\d+) ?/ ?(\\d+)"));
+    QString read;
     QStringList numbers;
     QString total;
-    QRegularExpressionMatchIterator found = pageNumber.globalMatch(read);
-    while (found.hasNext()) {
-        const QRegularExpressionMatch number = found.next();
-        numbers += number.captured(1);
-        total = number.captured(2);
+    readPdf(path, &read, &numbers, &total);
+    if (QTest::currentTestFailed() || QTest::currentTestResolved()) {
+        return;
     }
+    QVERIFY(read.contains(QLatin1String("paragraph 199")));
     QVERIFY2(numbers.size() > 1, qPrintable(QStringLiteral("page numbers read: %1").arg(numbers.join(QLatin1Char(' ')))));
     QCOMPARE(numbers.first(), QStringLiteral("1"));
     QCOMPARE(numbers.last(), total);
+    QCOMPARE(QString::number(numbers.size()), total);
+}
+
+// A document that fits on one page gets no "1 / 1": a number tells nothing there. The
+// numbers come back for the next document that needs them.
+void ExportTest::leavesASinglePageUnnumbered()
+{
+    const std::unique_ptr<KTextEditor::Document> doc(openDocument());
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc.get());
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+
+    QSignalSpy exported(preview.get(), &PreviewWidget::exported);
+    const QString shortPath = m_dir.filePath(QStringLiteral("one-page.pdf"));
+    preview->exportPdf(shortPath);
+    QVERIFY(exported.wait(ExportTimeoutMs));
+    QCOMPARE(exported.takeFirst().at(1).toBool(), true);
+
+    QString read;
+    QStringList numbers;
+    QString total;
+    readPdf(shortPath, &read, &numbers, &total);
+    if (QTest::currentTestFailed() || QTest::currentTestResolved()) {
+        return;
+    }
+    QVERIFY(read.contains(SampleBodyLine));
+    QVERIFY2(numbers.isEmpty(), qPrintable(QStringLiteral("a single page is numbered: %1 / %2").arg(numbers.join(QLatin1Char(' ')), total)));
+
+    QString text;
+    for (int i = 0; i < 200; ++i) {
+        text += QStringLiteral("paragraph %1\n\n").arg(i);
+    }
+    doc->setText(text);
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("paragraph 199")));
+    const QString longPath = m_dir.filePath(QStringLiteral("many-pages.pdf"));
+    preview->exportPdf(longPath);
+    QVERIFY(exported.wait(ExportTimeoutMs));
+    readPdf(longPath, &read, &numbers, &total);
+    QVERIFY2(numbers.size() > 1, qPrintable(QStringLiteral("page numbers read: %1").arg(numbers.join(QLatin1Char(' ')))));
     QCOMPARE(QString::number(numbers.size()), total);
 }
 

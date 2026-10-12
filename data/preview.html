@@ -16,8 +16,8 @@
     <style id="hljs-ghd">/*__HLJS_DARK__*/</style>
     <style id="hljs-generated"></style>
     <!-- PDF export: each page is numbered at its foot, "1 / 3". Not in base.css, which
-         the HTML export carries too. -->
-    <style>
+         the HTML export carries too. __setPageNumbers() turns it off. -->
+    <style id="page-numbers">
       @page {
         @bottom-center {
           content: counter(page) " / " counter(pages);

@@ -11,6 +11,7 @@
 //   __setColorScheme(dark)   set color-scheme + data attribute on <html>
 //   __scrollToLine(line, atEnd) / __topLine()   scroll sync (preview/scroll.js)
 //   __settled() / __exportBody()                used by the PDF and HTML exports
+//   __setPageNumbers(on)     number the pages of a PDF, or not
 //
 // The syntax extensions live in preview/*.js, which add themselves to window.katemark
 // before this file runs.
@@ -213,6 +214,11 @@
 
   window.__setLabels = function (labels) {
     katemark.labels = labels;
+  };
+
+  // The numbers at the foot of the pages of a PDF: off for a document of one page.
+  window.__setPageNumbers = function (on) {
+    document.getElementById("page-numbers").disabled = !on;
   };
 
   // True once nothing is still being drawn or loaded: an export waits for this.
