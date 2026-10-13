@@ -43,6 +43,8 @@ void PreviewWidget::loadPage()
     m_guard->setRoot(root);
     m_loaded = false;
     endExport(false); // an export cannot finish on a page that goes away
+    // Qt paints this color until the page has its own; white would flash in a dark preview.
+    m_web->page()->setBackgroundColor(pageBackground());
     m_web->setHtml(buildHtml(), baseUrl());
 }
 

@@ -102,6 +102,7 @@ private:
 
     // previewtheme.cpp
     void applyGithubLook(bool dark);
+    QColor pageBackground() const;
 
     // previewexport.cpp
     bool beginExport(const QString &path);

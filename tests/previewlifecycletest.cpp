@@ -10,7 +10,10 @@
 // Either way the preview widget outlives the document, so it has to keep rendering
 // from its own copy of the source.
 
+#include "settings.h"
 #include "testhelpers.h"
+
+#include <QScopeGuard>
 
 class PreviewLifecycleTest : public PreviewTest
 {
@@ -26,6 +29,7 @@ private Q_SLOTS:
     void loadsImageBesideTheDocument();
     void runsNoScriptOfTheDocument();
     void staysOnItsPage();
+    void showsNoWhiteWhileThePageLoads();
 };
 
 // One editor tab closing: Kate calls closeUrl(), which clears the url before anything
@@ -153,6 +157,31 @@ void PreviewLifecycleTest::staysOnItsPage()
     QVERIFY2(text.contains(QLatin1String("the last line")), qPrintable(QStringLiteral("the preview left its page, article reads: '%1'").arg(text)));
 
     delete doc;
+}
+
+// A dark preview shows no white while its page loads. Until the page's scripts have set
+// the colors it paints no background of its own, and Qt shows the one of the look in use.
+void PreviewLifecycleTest::showsNoWhiteWhileThePageLoads()
+{
+    Settings *settings = Settings::self();
+    const auto restore = qScopeGuard([settings, source = settings->colorSource(), variant = settings->githubVariant()]() {
+        settings->setColorSource(source);
+        settings->setGithubVariant(variant);
+    });
+    settings->setColorSource(Settings::GitHub);
+    settings->setGithubVariant(Settings::Dark);
+
+    const std::unique_ptr<KTextEditor::Document> doc(openDocument());
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc.get());
+    QVERIFY(preview->findChild<QWebEngineView *>()->page()->backgroundColor().lightness() < 128);
+
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+    // The page as it stands before its scripts have set the colors.
+    const QString unset = QStringLiteral("document.documentElement.style.removeProperty('--bgColor-default');");
+    for (const char *element : {"document.documentElement", "document.body", "document.getElementById('content')"}) {
+        const QString background = QStringLiteral("getComputedStyle(%1).backgroundColor").arg(QLatin1String(element));
+        QCOMPARE(evalJs(preview.get(), unset + background), QStringLiteral("rgba(0, 0, 0, 0)"));
+    }
 }
 
 QTEST_MAIN(PreviewLifecycleTest)
