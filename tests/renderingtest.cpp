@@ -309,23 +309,25 @@ void RenderingTest::keepsMathOnItsFeet()
     delete doc;
 }
 
-// A document that takes long to render says so in the bar, "Rendering" and dots that move,
-// and the bar is quiet again once the page shows the document.
+// While the page is busy for more than a moment the bar says so, "Rendering" and dots that
+// move, and it is quiet again once the page has caught up.
 void RenderingTest::saysWhenARenderTakesLong()
 {
-    QString text;
-    for (int i = 0; i < 3000; ++i) {
-        text += QStringLiteral("paragraph %1 with `code` and $x^2$\n\n```cpp\nint f%1() { return %1; }\n```\n\n").arg(i);
-    }
-    const std::unique_ptr<KTextEditor::Document> doc(KTextEditor::Editor::instance()->createDocument(nullptr));
-    doc->setText(text + SampleBodyLine);
+    const std::unique_ptr<KTextEditor::Document> doc(openDocument());
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc.get());
-
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
     auto *busy = preview->findChild<QLabel *>(QStringLiteral("busy"));
     QVERIFY(busy);
-    QVERIFY(busy->text().isEmpty());
-    QTRY_VERIFY_WITH_TIMEOUT(busy->text().startsWith(QLatin1String("Rendering.")), PageTimeoutMs);
-    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+    QTRY_VERIFY(busy->text().isEmpty());
+
+    // The page is kept busy for two seconds, whatever the speed of the machine: a long
+    // document would render in no time on a fast one. The new text waits behind that.
+    const QString twoBusySeconds = QStringLiteral("var end = Date.now() + 2000; while (Date.now() < end) {}");
+    preview->findChild<QWebEngineView *>()->page()->runJavaScript(twoBusySeconds);
+    doc->setText(QStringLiteral("rendered late\n"));
+    QTRY_COMPARE_WITH_TIMEOUT(busy->text(), QStringLiteral("Rendering."), ReactionTimeoutMs);
+    QTRY_COMPARE_WITH_TIMEOUT(busy->text(), QStringLiteral("Rendering.."), ReactionTimeoutMs);
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("rendered late")));
     QTRY_VERIFY_WITH_TIMEOUT(busy->text().isEmpty(), ReactionTimeoutMs);
 }
 
