@@ -221,6 +221,7 @@ enable the plugin.
 | `apt` reports unmet dependencies | The package is for another system: see [Install](#install) |
 | A picture from the web is missing | Enable "Load media previews from remote URLs" in the [settings](#settings) |
 | <kbd>Ctrl</kbd>+<kbd>B</kbd> does not make bold | See [Editing shortcuts](#editing-shortcuts) |
+| Kate's Output panel says `Failed to find server binary 'marksman'` | That message comes from Kate's LSP Client plugin, not from Katemark: it looks for a Markdown language server. Ignore it, install [marksman](https://github.com/artempyanykh/marksman) or turn that plugin off in Settings > Configure Kate > Plugins |
 | The console warns about `Qt::AA_ShareOpenGLContexts` | Harmless: the plugin starts Qt WebEngine once Kate is running |
 
 ## Build from source
