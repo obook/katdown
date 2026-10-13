@@ -1,10 +1,12 @@
 /* Page chrome around the github-markdown layout. Colors come from CSS
-   custom properties set at runtime, so gutters always match the theme. */
+   custom properties set at runtime, so gutters always match the theme.
+   Until they are set the page paints no background of its own: a white
+   one would flash in a dark preview. */
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bgColor-default, #ffffff);
+  background: var(--bgColor-default);
 }
 
 body {
@@ -18,7 +20,7 @@ body {
   width: 100%;
   margin: 0;
   padding: 32px 32px 96px;
-  background: var(--bgColor-default, #ffffff);
+  background: var(--bgColor-default);
 }
 
 /* "GitHub only" shows what GitHub shows, column width included. */

@@ -198,6 +198,20 @@ void PreviewWidget::applyGithubLook(bool dark)
     runJs(QStringLiteral("window.__useHljsTheme('%1');").arg(dark ? QStringLiteral("github-dark") : QStringLiteral("github")));
 }
 
+// The background of the look in use, known before the page is: its scripts set the colors
+// only once it has loaded.
+QColor PreviewWidget::pageBackground() const
+{
+    QJsonObject vars;
+    if (Settings::self()->colorSource() == Settings::GitHub) {
+        vars = githubVars(githubLookIsDark());
+    } else {
+        bool dark = false;
+        vars = applicationVars(m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme(), dark);
+    }
+    return QColor(vars.value(QLatin1String("--bgColor-default")).toString());
+}
+
 void PreviewWidget::changeEvent(QEvent *event)
 {
     QWidget::changeEvent(event);
