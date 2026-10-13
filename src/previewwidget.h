@@ -21,6 +21,7 @@ class QTimer;
 class QToolBar;
 class QAction;
 class QCheckBox;
+class QLabel;
 class QKeyEvent;
 class QKeySequence;
 class QMouseEvent;
@@ -98,6 +99,8 @@ private:
     void applyMacros();
     void applySyntax();
     void runJs(const QString &code);
+    void onScriptAnswered(int script);
+    void setIdle();
     void openLink(const QUrl &url);
 
     // previewtheme.cpp
@@ -132,6 +135,11 @@ private:
     QWebEngineView *m_web = nullptr;
     QToolBar *m_bar = nullptr;
     QCheckBox *m_githubOnlyBox = nullptr;
+    QLabel *m_busyLabel = nullptr; // "Rendering..." in the bar while the page is slow to answer
+    QTimer *m_busyTimer = nullptr;
+    int m_busyDots = 0;
+    int m_scriptsSent = 0; // scripts handed to the page, and the last one it has answered
+    int m_scriptsAnswered = 0;
     QWebEngineProfile *m_profile = nullptr;
     LocalFileGuard *m_guard = nullptr;
     QTimer *m_debounce = nullptr;

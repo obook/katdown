@@ -10,6 +10,7 @@
 #include "settings.h"
 
 #include <QCheckBox>
+#include <QLabel>
 #include <QScopeGuard>
 
 class RenderingTest : public PreviewTest
@@ -30,6 +31,7 @@ private Q_SLOTS:
     void rendersGithubOnly();
     void agreesWithGithubOnDatesAndAnchors();
     void keepsMathOnItsFeet();
+    void saysWhenARenderTakesLong();
 };
 
 // The libraries tested here come from qrc rather than the inlined page: the markdown-it plugins
@@ -305,6 +307,26 @@ void RenderingTest::keepsMathOnItsFeet()
     QCOMPARE(countElements(preview.get(), ".katex"), 1);
 
     delete doc;
+}
+
+// A document that takes long to render says so in the bar, "Rendering" and dots that move,
+// and the bar is quiet again once the page shows the document.
+void RenderingTest::saysWhenARenderTakesLong()
+{
+    QString text;
+    for (int i = 0; i < 3000; ++i) {
+        text += QStringLiteral("paragraph %1 with `code` and $x^2$\n\n```cpp\nint f%1() { return %1; }\n```\n\n").arg(i);
+    }
+    const std::unique_ptr<KTextEditor::Document> doc(KTextEditor::Editor::instance()->createDocument(nullptr));
+    doc->setText(text + SampleBodyLine);
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc.get());
+
+    auto *busy = preview->findChild<QLabel *>(QStringLiteral("busy"));
+    QVERIFY(busy);
+    QVERIFY(busy->text().isEmpty());
+    QTRY_VERIFY_WITH_TIMEOUT(busy->text().startsWith(QLatin1String("Rendering.")), PageTimeoutMs);
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+    QTRY_VERIFY_WITH_TIMEOUT(busy->text().isEmpty(), ReactionTimeoutMs);
 }
 
 QTEST_MAIN(RenderingTest)

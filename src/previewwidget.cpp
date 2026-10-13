@@ -14,6 +14,7 @@
 #include <QDesktopServices>
 #include <QIcon>
 #include <QJsonObject>
+#include <QLabel>
 #include <QTimer>
 #include <QToolBar>
 #include <QToolTip>
@@ -35,6 +36,11 @@ namespace
 constexpr int RenderDebounceMs = 150;
 
 constexpr int BarIconSizePx = 16;
+
+// A page that has not answered for this long is said to be rendering, and the dots after
+// the word move at this pace.
+constexpr int BusyTickMs = 400;
+constexpr int BusyLabelMarginPx = 8;
 
 // Default titles of the alerts and callouts, in the user's language. The page has no
 // access to the translations, so it gets them from here.
@@ -100,6 +106,18 @@ void PreviewWidget::createBar()
     m_githubOnlyBox->setChecked(Settings::self()->githubOnly());
     connect(m_githubOnlyBox, &QCheckBox::toggled, Settings::self(), &Settings::setGithubOnly);
     m_bar->addWidget(m_githubOnlyBox);
+    // Empty while the page keeps up: see runJs().
+    m_busyLabel = new QLabel(m_bar);
+    m_busyLabel->setObjectName(QStringLiteral("busy"));
+    m_busyLabel->setContentsMargins(BusyLabelMarginPx, 0, 0, 0);
+    m_bar->addWidget(m_busyLabel);
+    m_busyTimer = new QTimer(this);
+    m_busyTimer->setInterval(BusyTickMs);
+    connect(m_busyTimer, &QTimer::timeout, this, [this]() {
+        m_busyDots = m_busyDots % 3 + 1;
+        m_busyLabel->setText(i18nc("@info:status the preview is rendering a long document; one to three dots follow", "Rendering")
+                             + QString(m_busyDots, QLatin1Char('.')));
+    });
     auto *spacer = new QWidget(m_bar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_bar->addWidget(spacer);
@@ -137,6 +155,7 @@ void PreviewWidget::createWebView()
     // A page whose process died answers nothing more: an export would wait for ever.
     connect(page, &QWebEnginePage::renderProcessTerminated, this, [this]() {
         m_loaded = false;
+        setIdle();
         endExport(false);
     });
     m_web->settings()->setAttribute(QWebEngineSettings::FocusOnNavigationEnabled, false);
@@ -225,11 +244,44 @@ void PreviewWidget::openLink(const QUrl &url)
     }
 }
 
+// The page runs its scripts one after the other, so an answer to the last one sent means
+// it has caught up. While it has not, the bar says so after a moment: a long document
+// takes seconds to render.
 void PreviewWidget::runJs(const QString &code)
 {
-    if (m_web && m_loaded) {
-        m_web->page()->runJavaScript(code);
+    if (!m_web || !m_loaded) {
+        return;
     }
+    const int script = ++m_scriptsSent;
+    if (!m_busyTimer->isActive()) {
+        m_busyTimer->start();
+    }
+    // The answer arrives later, when this widget may be gone: QPointer turns null then.
+    const QPointer<PreviewWidget> self(this);
+    m_web->page()->runJavaScript(code, [self, script](const QVariant &) {
+        if (self) {
+            self->onScriptAnswered(script);
+        }
+    });
+}
+
+void PreviewWidget::onScriptAnswered(int script)
+{
+    m_scriptsAnswered = qMax(m_scriptsAnswered, script);
+    if (m_scriptsAnswered < m_scriptsSent) {
+        m_busyTimer->start(); // the page answers: the wait starts over for the next script
+    } else {
+        setIdle();
+    }
+}
+
+// Nothing is expected from the page any more: it has answered, or it is going away.
+void PreviewWidget::setIdle()
+{
+    m_scriptsAnswered = m_scriptsSent;
+    m_busyTimer->stop();
+    m_busyDots = 0;
+    m_busyLabel->clear();
 }
 
 void PreviewWidget::render()

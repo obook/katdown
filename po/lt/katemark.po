@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-12 21:07+0200\n"
+"POT-Creation-Date: 2026-10-13 12:32+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Lithuanian\n"
@@ -60,7 +60,7 @@ msgstr ""
 "sistemos apipavidalinimo\" perspalvina tą patį išdėstymą pagal aktyvų "
 "redaktoriaus apipavidalinimą, kad peržiūra derėtų su likusia Kate dalimi."
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:165
+#: src/configpage.cpp:97 src/previewwidget.cpp:180
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Įkelti mediją iš nuotolinių URL adresų"
@@ -244,105 +244,113 @@ msgstr "Įdėti kaip nuorodą"
 msgid "Format Table"
 msgstr "Formatuoti lentelę"
 
-#: src/previewwidget.cpp:44
+#: src/previewwidget.cpp:50
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "Pastaba"
 
-#: src/previewwidget.cpp:45
+#: src/previewwidget.cpp:51
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "Patarimas"
 
-#: src/previewwidget.cpp:46
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "Svarbu"
 
-#: src/previewwidget.cpp:47
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "Įspėjimas"
 
-#: src/previewwidget.cpp:48
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "Atsargiai"
 
-#: src/previewwidget.cpp:49
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "Santrauka"
 
-#: src/previewwidget.cpp:50
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "Informacija"
 
-#: src/previewwidget.cpp:51
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "Užduotis"
 
-#: src/previewwidget.cpp:52
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "Pavyko"
 
-#: src/previewwidget.cpp:53
+#: src/previewwidget.cpp:59
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "Klausimas"
 
-#: src/previewwidget.cpp:54
+#: src/previewwidget.cpp:60
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "Nepavyko"
 
-#: src/previewwidget.cpp:55
+#: src/previewwidget.cpp:61
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "Pavojus"
 
-#: src/previewwidget.cpp:56
+#: src/previewwidget.cpp:62
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "Klaida"
 
-#: src/previewwidget.cpp:57
+#: src/previewwidget.cpp:63
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "Pavyzdys"
 
-#: src/previewwidget.cpp:58
+#: src/previewwidget.cpp:64
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Citata"
 
-#: src/previewwidget.cpp:98
+#: src/previewwidget.cpp:104
 #, kde-format
 msgid "GitHub only"
 msgstr "Tik GitHub"
 
-#: src/previewwidget.cpp:99
+#: src/previewwidget.cpp:105
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
 "syntax"
 msgstr ""
 "Rodyti tik tai, ką rodo GitHub, be CodiMD, Obsidian ir MkDocs sintaksės"
+
+#: src/previewwidget.cpp:118
+#, kde-format
+msgctxt ""
+"@info:status the preview is rendering a long document; one to three dots "
+"follow"
+msgid "Rendering"
+msgstr "Atvaizduojama"
