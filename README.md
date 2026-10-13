@@ -95,8 +95,8 @@ WebEngine, so the runtime comes with the plugin. It installs next to
   The Microsoft Store version is not supported.
 - The build targets the Qt 6.11 of Kate's own Windows build. `install.ps1`
   refuses to install on another version.
-- The zip is built by a workflow and nobody has tried it on Windows since
-  the fork: please report what you see.
+- A workflow builds the zip. One user runs it on Windows 11, where the
+  preview and both exports work: please report what you see on yours.
 
 ### Arch Linux
 
@@ -136,8 +136,9 @@ The documents in [`examples/`](examples) show what the preview renders:
 | Zoom a Mermaid diagram | <kbd>Ctrl</kbd> + mouse wheel over it; a double click puts it back |
 | Paste a picture | Copy an image, then paste in the editor |
 
-- The preview follows the active Markdown document. When the active document
-  is not Markdown, it keeps its last content.
+- The preview follows the active Markdown document. It keeps its last
+  content when you close that document or switch to one that is not
+  Markdown, and stays open until you hide it.
 - Both exports use GitHub's light colors, whatever the preview shows. The
   HTML file embeds the pictures of the document's folder and holds no script.
 - Raw HTML in a document is shown, but its scripts, frames and forms are

@@ -29,14 +29,18 @@ it is built with [KDE Craft](https://community.kde.org/Craft) and MSVC 2022.
 
 ## Tests
 
-The tests render in a headless Chromium and keep their configuration out of your own Kate
-settings:
+The tests keep their configuration out of your own Kate settings:
 
 ```bash
 cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+On a desktop they open windows that take the keyboard: do not type while they run, or run them
+without a display, `QT_QPA_PLATFORM=offscreen ctest --test-dir build`. The tests that read a
+PDF back need `pdftotext` (package `poppler-utils`, `poppler` on Arch) and are skipped without
+it.
 
 `./build.sh` runs them too, before it makes the Debian package.
 
@@ -73,7 +77,7 @@ zip.
 | `src/configpage.*` | The settings page |
 | `src/settings.*` | Persisted settings |
 | `data/js/preview.js` | The page's rendering and the functions the plugin calls |
-| `data/js/preview/` | One file per concern: GitHub task lists and front matter, callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, blocked pictures |
+| `data/js/preview/` | One file per concern: shared helpers, GitHub task lists and front matter, callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, blocked pictures |
 | `data/` | The other bundled HTML, CSS, JS and the qrc |
 | `tests/` | Five test programs; the four that need a preview share `testhelpers.h` |
 
