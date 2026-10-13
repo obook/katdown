@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-12 21:07+0200\n"
+"POT-Creation-Date: 2026-10-13 12:32+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Hindi\n"
@@ -60,7 +60,7 @@ msgstr ""
 "उसी लेआउट को सक्रिय संपादक थीम के रंगों में रंग देता है, ताकि पूर्वावलोकन Kate के बाकी "
 "हिस्सों के साथ घुल-मिल जाए।"
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:165
+#: src/configpage.cpp:97 src/previewwidget.cpp:180
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "रिमोट URL से मीडिया पूर्वावलोकन लोड करें"
@@ -240,105 +240,113 @@ msgstr "लिंक के रूप में चिपकाएँ"
 msgid "Format Table"
 msgstr "तालिका प्रारूपित करें"
 
-#: src/previewwidget.cpp:44
+#: src/previewwidget.cpp:50
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "टिप्पणी"
 
-#: src/previewwidget.cpp:45
+#: src/previewwidget.cpp:51
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "सुझाव"
 
-#: src/previewwidget.cpp:46
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "महत्वपूर्ण"
 
-#: src/previewwidget.cpp:47
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "चेतावनी"
 
-#: src/previewwidget.cpp:48
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "सावधानी"
 
-#: src/previewwidget.cpp:49
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "सारांश"
 
-#: src/previewwidget.cpp:50
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "जानकारी"
 
-#: src/previewwidget.cpp:51
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "कार्य"
 
-#: src/previewwidget.cpp:52
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "सफलता"
 
-#: src/previewwidget.cpp:53
+#: src/previewwidget.cpp:59
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "प्रश्न"
 
-#: src/previewwidget.cpp:54
+#: src/previewwidget.cpp:60
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "विफलता"
 
-#: src/previewwidget.cpp:55
+#: src/previewwidget.cpp:61
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "खतरा"
 
-#: src/previewwidget.cpp:56
+#: src/previewwidget.cpp:62
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "बग"
 
-#: src/previewwidget.cpp:57
+#: src/previewwidget.cpp:63
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "उदाहरण"
 
-#: src/previewwidget.cpp:58
+#: src/previewwidget.cpp:64
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "उद्धरण"
 
-#: src/previewwidget.cpp:98
+#: src/previewwidget.cpp:104
 #, kde-format
 msgid "GitHub only"
 msgstr "केवल GitHub"
 
-#: src/previewwidget.cpp:99
+#: src/previewwidget.cpp:105
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
 "syntax"
 msgstr ""
 "केवल वही दिखाएँ जो GitHub दिखाता है, CodiMD, Obsidian और MkDocs सिंटैक्स के बिना"
+
+#: src/previewwidget.cpp:118
+#, kde-format
+msgctxt ""
+"@info:status the preview is rendering a long document; one to three dots "
+"follow"
+msgid "Rendering"
+msgstr "रेंडर हो रहा है"

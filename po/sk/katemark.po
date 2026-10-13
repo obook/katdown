@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-12 21:07+0200\n"
+"POT-Creation-Date: 2026-10-13 12:32+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Slovak\n"
@@ -60,7 +60,7 @@ msgstr ""
 "zafarbí rovnaké rozloženie podľa aktívnej témy editora, takže náhľad ladí so "
 "zvyškom aplikácie Kate."
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:165
+#: src/configpage.cpp:97 src/previewwidget.cpp:180
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Načítať náhľady médií zo vzdialených URL"
@@ -243,105 +243,113 @@ msgstr "Vložiť ako odkaz"
 msgid "Format Table"
 msgstr "Formátovať tabuľku"
 
-#: src/previewwidget.cpp:44
+#: src/previewwidget.cpp:50
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "Poznámka"
 
-#: src/previewwidget.cpp:45
+#: src/previewwidget.cpp:51
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "Tip"
 
-#: src/previewwidget.cpp:46
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "Dôležité"
 
-#: src/previewwidget.cpp:47
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "Varovanie"
 
-#: src/previewwidget.cpp:48
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "Pozor"
 
-#: src/previewwidget.cpp:49
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "Zhrnutie"
 
-#: src/previewwidget.cpp:50
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "Informácie"
 
-#: src/previewwidget.cpp:51
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "Úloha"
 
-#: src/previewwidget.cpp:52
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "Úspech"
 
-#: src/previewwidget.cpp:53
+#: src/previewwidget.cpp:59
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "Otázka"
 
-#: src/previewwidget.cpp:54
+#: src/previewwidget.cpp:60
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "Zlyhanie"
 
-#: src/previewwidget.cpp:55
+#: src/previewwidget.cpp:61
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "Nebezpečenstvo"
 
-#: src/previewwidget.cpp:56
+#: src/previewwidget.cpp:62
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "Chyba"
 
-#: src/previewwidget.cpp:57
+#: src/previewwidget.cpp:63
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "Príklad"
 
-#: src/previewwidget.cpp:58
+#: src/previewwidget.cpp:64
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Citát"
 
-#: src/previewwidget.cpp:98
+#: src/previewwidget.cpp:104
 #, kde-format
 msgid "GitHub only"
 msgstr "Iba GitHub"
 
-#: src/previewwidget.cpp:99
+#: src/previewwidget.cpp:105
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
 "syntax"
 msgstr ""
 "Zobraziť iba to, čo zobrazuje GitHub, bez syntaxe CodiMD, Obsidian a MkDocs"
+
+#: src/previewwidget.cpp:118
+#, kde-format
+msgctxt ""
+"@info:status the preview is rendering a long document; one to three dots "
+"follow"
+msgid "Rendering"
+msgstr "Vykresľovanie"

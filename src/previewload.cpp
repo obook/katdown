@@ -42,6 +42,7 @@ void PreviewWidget::loadPage()
     const QString root = m_url.isLocalFile() ? QFileInfo(m_url.toLocalFile()).absolutePath() : QString();
     m_guard->setRoot(root);
     m_loaded = false;
+    setIdle(); // the page that goes away will not answer its scripts
     endExport(false); // an export cannot finish on a page that goes away
     // Qt paints this color until the page has its own; white would flash in a dark preview.
     m_web->page()->setBackgroundColor(pageBackground());
