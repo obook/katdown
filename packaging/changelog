@@ -1,0 +1,75 @@
+katemark (0.4.5) unstable; urgency=medium
+
+  * Security: raw HTML in a document could run script in the preview. The
+    preview now runs the plugin's scripts only.
+  * Security: the HTML export embeds pictures from the document's folder
+    only.
+  * Number the pages of a PDF export, "1 / 3" (Qt 6.10 or later).
+  * Add an Open button to the "Preview exported" message.
+  * Show a hint in an empty panel.
+  * Stop a dark preview from flashing white during an export.
+  * Fix a shortcut pressed in the preview acting on a hidden document.
+  * Fix links with target="_blank" and middle clicks doing nothing.
+  * Follow a change of the editor's color theme.
+  * Fix the heading level of selected lines changing the next line too.
+  * Fix front matter dates shown with a time, "$" inside \text{}, heading
+    anchors with punctuation, and a malformed math macro blanking the
+    document.
+  * Windows: the Ctrl+Alt shortcuts no longer have a default key.
+  * KWidgetsAddons is a new build dependency.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Mon, 12 Oct 2026 19:31:35 +0000
+
+katemark (0.4.4) unstable; urgency=medium
+
+  * Show where a link goes when the pointer is on it.
+  * Draw the boxes of task lists in the colors of the theme: checked ones
+    were hard to see.
+  * Open a link to ~/notes in the home folder.
+  * Open the .md file of a link written without its extension.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Sun, 11 Oct 2026 22:42:59 +0000
+
+katemark (0.4.3) unstable; urgency=medium
+
+  * Fix the labels of Mermaid diagrams being cut off.
+  * Keep the 980 px column for the "GitHub only" mode. Elsewhere the
+    article takes the whole pane.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Fri, 09 Oct 2026 22:38:20 +0000
+
+katemark (0.4.2) unstable; urgency=medium
+
+  * Show a code block with no language as plain text, as GitHub does.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Tue, 06 Oct 2026 22:29:55 +0000
+
+katemark (0.4.1) unstable; urgency=medium
+
+  * Fix the \hline at the top or bottom of a math array vanishing at some
+    zoom levels.
+  * Translate the two "GitHub only" strings into the 44 languages.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Sun, 04 Oct 2026 15:21:59 +0000
+
+katemark (0.4.0) unstable; urgency=medium
+
+  * Add a bar above the preview, with a "GitHub only" check box and the
+    two exports.
+  * "GitHub only" leaves out the CodiMD, Obsidian and MkDocs syntax, to
+    show a document as GitHub will.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Sat, 03 Oct 2026 18:36:46 +0000
+
+katemark (0.3.0) unstable; urgency=medium
+
+  * First release of Katemark, a fork of Katdown by uwuclxdy.
+  * Dock the preview beside the editor and scroll the two together.
+  * Read the CodiMD, Obsidian and MkDocs syntax and more markdown-it
+    extensions.
+  * Render math with KaTeX and diagrams with Mermaid.
+  * Export the preview to PDF and HTML.
+  * Add Markdown editing actions and image paste.
+  * Translate the interface into 44 languages.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Sat, 03 Oct 2026 17:26:56 +0000

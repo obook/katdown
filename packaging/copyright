@@ -1,0 +1,19 @@
+Katemark, a Markdown preview plugin for the Kate editor
+https://github.com/obook/katemark
+
+Copyright 2026 uwuclxdy (Katdown, the project Katemark is a fork of)
+Copyright 2026 Olivier Booklage
+
+License: GPL-3.0-or-later
+
+On Debian systems, the full text of the GNU General Public License
+version 3 is in /usr/share/common-licenses/GPL-3.
+
+The plugin embeds these libraries:
+
+  markdown-it and its plugins, markdown-it-texmath, js-yaml, KaTeX,
+  Mermaid and github-markdown-css, under the MIT License;
+  highlight.js, under the BSD-3-Clause License;
+  the KaTeX fonts, under the SIL Open Font License 1.1.
+
+Their notices are in THIRD-PARTY-NOTICES.md, beside this file.
