@@ -52,8 +52,9 @@ every translation.
 
 ## Releases
 
-A tag `v<version>` that matches `project(VERSION)` in `CMakeLists.txt` and `Version` in
-`src/katemark.json` starts three workflows: `release.yml` creates the GitHub release, `deb.yml`
+A release needs its version in three places: `project(VERSION)` in `CMakeLists.txt`, `Version`
+in `src/katemark.json` and a new first entry in `packaging/changelog`, which the Debian packages
+carry. A tag `v<version>` that matches them starts three workflows: `release.yml` creates the GitHub release, `deb.yml`
 attaches the Debian packages for KDE neon and Ubuntu 26.04, `windows.yml` attaches the Windows
 zip.
 
