@@ -9,7 +9,7 @@ What is in here
 ---------------
 
   install.ps1   installs and uninstalls
-  payload\      the plugin, plus the Qt WebEngine runtime it needs
+  payload\      the plugin, its translations and the Qt WebEngine runtime it needs
 
 Kate for Windows ships no Qt WebEngine and the preview is a web view, so the runtime comes with the
 plugin. It installs next to kate.exe, where Windows looks for the libraries a plugin needs.
