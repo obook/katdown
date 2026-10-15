@@ -32,6 +32,9 @@ Craft installation the files come from (the one that built the plugin).
 .PARAMETER PluginDll
 Path to the built katemark.dll.
 
+.PARAMETER LocaleDir
+The build's compiled translations (build\locale, one <lang>\LC_MESSAGES\katemark.mo per language).
+
 .PARAMETER OutDir
 Directory to assemble into. Created if absent, cleared if it already holds a payload.
 
@@ -39,13 +42,14 @@ Directory to assemble into. Created if absent, cleared if it already holds a pay
 Optional path for a zip of the assembled tree.
 
 .EXAMPLE
-.\make-payload.ps1 -CraftRoot C:\CraftRoot -PluginDll build\bin\kf6\ktexteditor\katemark.dll -OutDir dist
+.\make-payload.ps1 -CraftRoot C:\CraftRoot -PluginDll build\bin\kf6\ktexteditor\katemark.dll -LocaleDir build\locale -OutDir dist
 #>
 #Requires -Version 5.1
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$CraftRoot,
     [Parameter(Mandatory)][string]$PluginDll,
+    [Parameter(Mandatory)][string]$LocaleDir,
     [Parameter(Mandatory)][string]$OutDir,
     [string]$Zip
 )
@@ -123,10 +127,24 @@ New-Item -ItemType Directory -Path (Split-Path -Parent $pluginDest) -Force | Out
 Copy-Item -LiteralPath $PluginDll -Destination $pluginDest -Force
 $total += (Get-Item $pluginDest).Length
 
+# Kate for Windows keeps its catalogs under bin\data\locale (ECM's LOCALEDIR on WIN32), and KI18n
+# looks there. Without them the plugin stays in English in a translated Kate.
+$catalogs = @(Get-ChildItem -Path (Join-Path $LocaleDir '*\LC_MESSAGES\katemark.mo') -File -ErrorAction SilentlyContinue)
+if ($catalogs.Count -eq 0) {
+    throw "No katemark.mo under '$LocaleDir'."
+}
+foreach ($mo in $catalogs) {
+    $lang = $mo.Directory.Parent.Name
+    $to = Join-Path $payloadDir "bin\data\locale\$lang\LC_MESSAGES\katemark.mo"
+    New-Item -ItemType Directory -Path (Split-Path -Parent $to) -Force | Out-Null
+    Copy-Item -LiteralPath $mo.FullName -Destination $to -Force
+    $total += $mo.Length
+}
+
 Copy-Item -LiteralPath (Join-Path $ScriptDir 'install.ps1') -Destination (Join-Path $OutDir 'install.ps1') -Force
 Copy-Item -LiteralPath (Join-Path $ScriptDir 'README.txt') -Destination (Join-Path $OutDir 'README.txt') -Force
 
-$count = $Files.Count + 1
+$count = $Files.Count + 1 + $catalogs.Count
 Write-Host ("Assembled {0} files, {1:N0} bytes, into {2}" -f $count, $total, $payloadDir)
 
 if ($Zip) {
