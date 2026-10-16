@@ -12,6 +12,8 @@
 #include <QColor>
 #include <QEvent>
 #include <QPalette>
+#include <QWebEnginePage>
+#include <QWebEngineView>
 
 #include <KSyntaxHighlighting/Theme>
 #include <KTextEditor/Editor>
@@ -47,6 +49,13 @@ struct VarPair {
     const char *key;
     const char *value;
 };
+
+// The color Qt paints where the page shows none of its own: before the page loads, and in
+// the margins of a PDF.
+QColor background(const QJsonObject &vars)
+{
+    return QColor(vars.value(QLatin1String("--bgColor-default")).toString());
+}
 } // namespace
 
 bool paletteIsDark()
@@ -185,6 +194,7 @@ void PreviewWidget::applyTheme()
         const Theme theme = m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme();
         bool dark = false;
         const QJsonObject vars = applicationVars(theme, dark);
+        m_web->page()->setBackgroundColor(background(vars));
         runJs(QStringLiteral("window.__setColorScheme(%1);").arg(dark ? QStringLiteral("true") : QStringLiteral("false")));
         runJs(QStringLiteral("window.__applyVars(%1);").arg(compactJson(vars)));
         runJs(QStringLiteral("window.__setCodeCss(%1);").arg(jsLiteral(applicationCodeCss(theme))));
@@ -193,8 +203,10 @@ void PreviewWidget::applyTheme()
 
 void PreviewWidget::applyGithubLook(bool dark)
 {
+    const QJsonObject vars = githubVars(dark);
+    m_web->page()->setBackgroundColor(background(vars));
     runJs(QStringLiteral("window.__setColorScheme(%1);").arg(dark ? QStringLiteral("true") : QStringLiteral("false")));
-    runJs(QStringLiteral("window.__applyVars(%1);").arg(compactJson(githubVars(dark))));
+    runJs(QStringLiteral("window.__applyVars(%1);").arg(compactJson(vars)));
     runJs(QStringLiteral("window.__useHljsTheme('%1');").arg(dark ? QStringLiteral("github-dark") : QStringLiteral("github")));
 }
 
@@ -209,7 +221,7 @@ QColor PreviewWidget::pageBackground() const
         bool dark = false;
         vars = applicationVars(m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme(), dark);
     }
-    return QColor(vars.value(QLatin1String("--bgColor-default")).toString());
+    return background(vars);
 }
 
 void PreviewWidget::changeEvent(QEvent *event)

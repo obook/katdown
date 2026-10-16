@@ -28,6 +28,7 @@ private Q_SLOTS:
     }
     void exportsPdfAndHtml();
     void keepsItsLookDuringAnExport();
+    void printsLightMarginsFromADarkPreview();
     void runsOneExportAtATime();
     void endsAnExportWhenThePageReloads();
     void numbersThePagesOfAPdf();
@@ -173,6 +174,42 @@ void ExportTest::keepsItsLookDuringAnExport()
     QCOMPARE(exported.at(0).at(1).toBool(), true);
     QCOMPARE(exported.at(1).at(1).toBool(), true);
     QTRY_VERIFY(!web->findChild<QLabel *>()); // the picture is gone in the end
+}
+
+// A PDF is printed in the light look, its margins too: Chromium fills them with the
+// background Qt gives the page, not with the document's.
+void ExportTest::printsLightMarginsFromADarkPreview()
+{
+    const QString pdftoppm = QStandardPaths::findExecutable(QStringLiteral("pdftoppm"));
+    if (pdftoppm.isEmpty()) {
+        QSKIP("pdftoppm is needed to look at the PDF");
+    }
+    Settings *settings = Settings::self();
+    const auto restore = qScopeGuard([settings, source = settings->colorSource(), variant = settings->githubVariant()]() {
+        settings->setColorSource(source);
+        settings->setGithubVariant(variant);
+    });
+    settings->setColorSource(Settings::GitHub);
+    settings->setGithubVariant(Settings::Dark);
+
+    const std::unique_ptr<KTextEditor::Document> doc(openDocument());
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc.get());
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+
+    QSignalSpy exported(preview.get(), &PreviewWidget::exported);
+    const QString path = m_dir.filePath(QStringLiteral("dark-preview.pdf"));
+    preview->exportPdf(path);
+    QVERIFY(exported.wait(ExportTimeoutMs));
+    QCOMPARE(exported.at(0).at(1).toBool(), true);
+
+    // The first page at 20 dpi: its margins are about 12 pixels wide.
+    const QString picture = m_dir.filePath(QStringLiteral("dark-preview"));
+    QProcess render;
+    render.start(pdftoppm, {QStringLiteral("-r"), QStringLiteral("20"), QStringLiteral("-png"), QStringLiteral("-singlefile"), path, picture});
+    QVERIFY(render.waitForFinished(ExportTimeoutMs));
+    const QImage page(picture + QStringLiteral(".png"));
+    QVERIFY(!page.isNull());
+    QVERIFY2(page.pixelColor(3, 3).lightness() > 128, "the margins of the PDF are dark");
 }
 
 // One export at a time: a second one asked meanwhile fails at once and leaves the first
