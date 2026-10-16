@@ -88,18 +88,25 @@ file(STRINGS packaging/changelog changelog_head LIMIT_COUNT 1)
 if(NOT changelog_head MATCHES "^katemark \\(${PROJECT_VERSION}\\) ")
     message(FATAL_ERROR "packaging/changelog does not start with version ${PROJECT_VERSION}")
 endif()
+# These files are read here, at configure time: an edit has to configure again.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    packaging/changelog packaging/copyright THIRD-PARTY-NOTICES.md)
 
 # What a Debian package keeps in /usr/share/doc: its changelog, compressed, its copyright
 # and the notices of the bundled libraries. Package managers read the changelog there.
 # Only the package gets them, not a plain install.
-set(package_doc "${CMAKE_BINARY_DIR}/package-doc")
-file(MAKE_DIRECTORY "${package_doc}")
-file(ARCHIVE_CREATE OUTPUT "${package_doc}/changelog.gz"
-    PATHS "${CMAKE_SOURCE_DIR}/packaging/changelog" FORMAT raw COMPRESSION GZip)
-file(COPY packaging/copyright THIRD-PARTY-NOTICES.md DESTINATION "${package_doc}")
-# The package takes the files with the permissions they have here.
-file(CHMOD "${package_doc}/changelog.gz" "${package_doc}/copyright" "${package_doc}/THIRD-PARTY-NOTICES.md"
-    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+if(UNIX)
+    set(package_doc "${CMAKE_BINARY_DIR}/package-doc")
+    file(MAKE_DIRECTORY "${package_doc}")
+    # gzip -9n, as Debian wants it: no timestamp, so two builds give the same package.
+    execute_process(COMMAND gzip -9nc "${CMAKE_SOURCE_DIR}/packaging/changelog"
+        OUTPUT_FILE "${package_doc}/changelog.gz" COMMAND_ERROR_IS_FATAL ANY)
+    file(COPY packaging/copyright THIRD-PARTY-NOTICES.md DESTINATION "${package_doc}")
+    # The package takes the files with the permissions they have here.
+    file(CHMOD "${package_doc}/changelog.gz" "${package_doc}/copyright" "${package_doc}/THIRD-PARTY-NOTICES.md"
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+    set(CPACK_INSTALLED_DIRECTORIES "${package_doc}" "usr/share/doc/katemark")
+endif()
 
 # "cpack -G DEB", run in the build directory, makes an installable package.
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Markdown preview plugin for the Kate editor")
@@ -111,7 +118,6 @@ with the editor.
 It renders math with KaTeX and diagrams with Mermaid, reads the CodiMD,
 Obsidian and MkDocs syntax, and exports to PDF and HTML. The renderer, the
 styles and the fonts ship with the plugin, so it works offline.")
-set(CPACK_INSTALLED_DIRECTORIES "${package_doc}" "usr/share/doc/katemark")
 set(CPACK_PACKAGE_CONTACT "Olivier Booklage <olivier.booklage@ac-bordeaux.fr>")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/obook/katemark")
 set(CPACK_STRIP_FILES ON)

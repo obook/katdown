@@ -11,6 +11,9 @@
 #
 set -euo pipefail
 
+# Debian wants the folders of a package in 0755: a umask of 0002 would make them 0775.
+umask 022
+
 # Packages to install before building, under their KDE neon names. Other
 # distributions name them differently.
 readonly BUILD_PACKAGES="g++ cmake extra-cmake-modules gettext dpkg-dev poppler-utils \
