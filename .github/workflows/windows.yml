@@ -91,12 +91,16 @@ jobs:
           & $env:VSDEVSH -SkipAutomaticLocation -Arch amd64 -HostArch amd64
           $env:ANDROID_SDK_ROOT = $null
           python -m pip install --upgrade certifi
-          $installer = Join-Path $env:RUNNER_TEMP 'install_craft.ps1'
-          Invoke-WebRequest -Uri 'https://invent.kde.org/packaging/craft/-/raw/master/setup/install_craft.ps1' -OutFile $installer
-          Unblock-File -Path $installer
+          # invent.kde.org answers 403 to GitHub's runners since 2026-10-15, so Craft comes from
+          # KDE's mirrors on GitHub: the installer takes a clone through -localdev, and git sends
+          # Craft's own clones of packaging/craft and packaging/craft-blueprints-kde there too.
+          git config --global 'url.https://github.com/KDE/.insteadOf' 'https://invent.kde.org/packaging/'
+          $craftSource = Join-Path $env:RUNNER_TEMP 'craft'
+          git clone --depth 1 https://github.com/KDE/craft.git $craftSource
+          if ($LASTEXITCODE -ne 0) { throw 'could not clone Craft' }
           # -use-defaults picks msvc2022 + x86_64 with no prompts. It is a param() script, so it has
           # to be invoked as a file; piping it to iex cannot pass arguments.
-          & $installer -use-defaults -root C:\CraftRoot
+          & (Join-Path $craftSource 'setup\install_craft.ps1') -use-defaults -root C:\CraftRoot -localdev $craftSource
           if (-not (Test-Path 'C:\CraftRoot\craft\craftenv.ps1')) {
             throw 'craft bootstrap produced no craftenv.ps1'
           }
