@@ -37,6 +37,6 @@ too, and so do short names: `def`, `thm`, `lem`, `prop`, `cor`, `pf`,
 
 ## Picture size
 
-Pandoc's `{width=...}` after a picture, here `{width=30%}`:
+`{width=...}` after a picture, here `{width=30%}`:
 
 ![A small picture](image.png){width=30%}
