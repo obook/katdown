@@ -27,15 +27,8 @@
 > [!solution]- Solution
 > $u_{10} = 3 + 10 \times 2 = 23$.
 
-## French names
-
-Each type also takes its French name, with or without accents.
-
-> [!théorème] Théorème de Pythagore
-> Dans un triangle rectangle, $a^2 + b^2 = c^2$.
-
-> [!correction]- Correction
-> Le repli marche comme pour les autres types.
+Each type also takes its French name, with or without accents: `théorème`,
+`propriété`, `démonstration`, `exercice`, `méthode`, `remarque`, `correction`.
 
 ## Picture size
 
