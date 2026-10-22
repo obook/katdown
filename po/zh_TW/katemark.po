@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-22 14:52+0200\n"
+"POT-Creation-Date: 2026-10-22 20:11+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Chinese (Traditional)\n"
@@ -59,7 +59,7 @@ msgstr ""
 "「GitHub」使用 GitHub 自己的配色。「配合編輯器 / 系統主題」會依目前的編輯器主"
 "題為相同的版面重新上色，讓預覽與 Kate 的其他部分融為一體。"
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:188
+#: src/configpage.cpp:97 src/previewwidget.cpp:195
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "從遠端 URL 載入媒體預覽"
@@ -340,52 +340,94 @@ msgstr ""
 #: src/previewwidget.cpp:67
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Property"
+msgid "Lemma"
 msgstr ""
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Proof"
+msgid "Proposition"
 msgstr ""
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Exercise"
+msgid "Corollary"
 msgstr ""
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Method"
+msgid "Axiom"
 msgstr ""
 
 #: src/previewwidget.cpp:71
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Claim"
+msgstr ""
+
+#: src/previewwidget.cpp:72
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Assumption"
+msgstr ""
+
+#: src/previewwidget.cpp:73
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Conjecture"
+msgstr ""
+
+#: src/previewwidget.cpp:74
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Hypothesis"
+msgstr ""
+
+#: src/previewwidget.cpp:75
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Proof"
+msgstr ""
+
+#: src/previewwidget.cpp:76
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Exercise"
+msgstr ""
+
+#: src/previewwidget.cpp:77
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Method"
+msgstr ""
+
+#: src/previewwidget.cpp:78
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
 msgstr "Katemark"
 
-#: src/previewwidget.cpp:72
+#: src/previewwidget.cpp:79
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
 msgstr "注意"
 
-#: src/previewwidget.cpp:112
+#: src/previewwidget.cpp:119
 #, kde-format
 msgid "GitHub only"
 msgstr "僅 GitHub"
 
-#: src/previewwidget.cpp:113
+#: src/previewwidget.cpp:120
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
 "syntax"
 msgstr "僅呈現 GitHub 會呈現的內容，不含 CodiMD、Obsidian 和 MkDocs 語法"
 
-#: src/previewwidget.cpp:126
+#: src/previewwidget.cpp:133
 #, kde-format
 msgctxt ""
 "@info:status the preview is rendering a long document; one to three dots "

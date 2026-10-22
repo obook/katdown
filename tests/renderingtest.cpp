@@ -77,7 +77,7 @@ void RenderingTest::rendersObsidianSyntax()
 
     doc->setText(QStringLiteral("> [!faq]- Why *now*?\n> the folded answer\n\n> [!bug]\n> the bug line\n\n"
                                 "See [[Other Note|the other]] and ![[%1|40]] %%hidden words%% end.\n\n%%\na hidden block\n%%\n\n"
-                                "> [!théorème]\n> a teaching block\n\n![](%1){width=50%} ![](%1){#fig:a width=\"30%\"} and ![](%1){.wide}\n\nlast line\n")
+                                "> [!théorème]\n> a teaching block\n\n> [!lem]\n> a short name\n\n![](%1){width=50%} ![](%1){#fig:a width=\"30%\"} and ![](%1){.wide}\n\nlast line\n")
                      .arg(ImageName));
     QVERIFY(waitForPageText(preview.get(), QLatin1String("last line")));
     QCOMPARE(countElements(preview.get(), "details.markdown-alert:not([open]) > summary.markdown-alert-title > em"), 1);
@@ -87,9 +87,11 @@ void RenderingTest::rendersObsidianSyntax()
     QCOMPARE(waitForImageWidth(preview.get()), ImageWidth);
     const QString text = evalJs(preview.get(), QStringLiteral("document.getElementById('content').textContent"));
     QVERIFY(text.contains(QLatin1String("Bug")));
-    // A French teaching type takes its English title and the purple of GitHub's "important".
-    QCOMPARE(countElements(preview.get(), "div.markdown-alert-important > p.markdown-alert-title"), 1);
+    // A French name and an Academic Notes short name take the English title and the
+    // purple of GitHub's "important".
+    QCOMPARE(countElements(preview.get(), "div.markdown-alert-important > p.markdown-alert-title"), 2);
     QVERIFY(text.contains(QLatin1String("Theorem")));
+    QVERIFY(text.contains(QLatin1String("Lemma")));
     // Pandoc's size applies beside other attributes; braces with no size stay as text.
     QCOMPARE(countElements(preview.get(), "img[style=\"width:50%;\"]"), 1);
     QCOMPARE(countElements(preview.get(), "img[style=\"width:30%;\"]"), 1);
@@ -248,10 +250,12 @@ void RenderingTest::rendersGithubOnly()
 
     doc->setText(QStringLiteral("# Title\n\n[TOC]\n\n:::info\nboxed\n:::\n\n==marked== ++inserted++ H~2~O [[Note]]\n\n"
                                 "!!! note\n    admonition body\n\n> [!faq] Obsidian title\n> callout body\n\n"
+                                "> [!thm]\n> theorem body\n\n![](a.png){width=50%}\n\n"
                                 "> [!NOTE]\n> alert body\n\n~struck out~ and $a^2$\n\nthe last line\n"));
     QVERIFY(waitForPageText(preview.get(), QLatin1String("the last line")));
     QCOMPARE(countElements(preview.get(), "ul.toc, .alert-info, mark, ins, sub"), 5);
-    QCOMPARE(countElements(preview.get(), ".markdown-alert"), 3);
+    QCOMPARE(countElements(preview.get(), ".markdown-alert"), 4);
+    QCOMPARE(countElements(preview.get(), "img[style]"), 1);
     QCOMPARE(countElements(preview.get(), "s"), 0);
 
     auto *githubOnly = preview->findChild<QCheckBox *>();
@@ -265,6 +269,9 @@ void RenderingTest::rendersGithubOnly()
     QCOMPARE(countElements(preview.get(), "h1#title"), 1); // anchors still work
     const QString text = pageText(preview.get());
     QVERIFY2(text.contains(QLatin1String("[TOC]")) && text.contains(QLatin1String("[[Note]]")) && text.contains(QLatin1String("==marked==")), qPrintable(text));
+    // GitHub knows neither the teaching callouts nor Pandoc's sizes.
+    QCOMPARE(countElements(preview.get(), "img[style]"), 0);
+    QVERIFY2(text.contains(QLatin1String("[!thm]")) && text.contains(QLatin1String("{width=50%}")), qPrintable(text));
 
     // Changed from elsewhere, the setting is followed and the check box shows it.
     Settings::self()->setGithubOnly(false);

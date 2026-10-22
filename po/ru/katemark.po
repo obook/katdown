@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-22 14:52+0200\n"
+"POT-Creation-Date: 2026-10-22 20:11+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Russian\n"
@@ -61,7 +61,7 @@ msgstr ""
 "редактора, чтобы предварительный просмотр сочетался с остальным интерфейсом "
 "Kate."
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:188
+#: src/configpage.cpp:97 src/previewwidget.cpp:195
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Загружать медиафайлы с удалённых URL-адресов"
@@ -353,45 +353,87 @@ msgstr ""
 #: src/previewwidget.cpp:67
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Property"
+msgid "Lemma"
 msgstr ""
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Proof"
+msgid "Proposition"
 msgstr ""
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Exercise"
+msgid "Corollary"
 msgstr ""
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
-msgid "Method"
+msgid "Axiom"
 msgstr ""
 
 #: src/previewwidget.cpp:71
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Claim"
+msgstr ""
+
+#: src/previewwidget.cpp:72
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Assumption"
+msgstr ""
+
+#: src/previewwidget.cpp:73
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Conjecture"
+msgstr ""
+
+#: src/previewwidget.cpp:74
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Hypothesis"
+msgstr ""
+
+#: src/previewwidget.cpp:75
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Proof"
+msgstr ""
+
+#: src/previewwidget.cpp:76
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Exercise"
+msgstr ""
+
+#: src/previewwidget.cpp:77
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Method"
+msgstr ""
+
+#: src/previewwidget.cpp:78
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
 msgstr "Katemark"
 
-#: src/previewwidget.cpp:72
+#: src/previewwidget.cpp:79
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
 msgstr "Осторожно"
 
-#: src/previewwidget.cpp:112
+#: src/previewwidget.cpp:119
 #, kde-format
 msgid "GitHub only"
 msgstr "Только GitHub"
 
-#: src/previewwidget.cpp:113
+#: src/previewwidget.cpp:120
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
@@ -400,7 +442,7 @@ msgstr ""
 "Отображать только то, что отображает GitHub, без синтаксиса CodiMD, Obsidian "
 "и MkDocs"
 
-#: src/previewwidget.cpp:126
+#: src/previewwidget.cpp:133
 #, kde-format
 msgctxt ""
 "@info:status the preview is rendering a long document; one to three dots "

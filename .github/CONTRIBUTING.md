@@ -78,7 +78,7 @@ zip.
 | `src/configpage.*` | The settings page |
 | `src/settings.*` | Persisted settings |
 | `data/js/preview.js` | The page's rendering and the functions the plugin calls |
-| `data/js/preview/` | One file per concern: shared helpers, GitHub task lists and front matter, callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, blocked pictures |
+| `data/js/preview/` | One file per concern: shared helpers, GitHub task lists and front matter, callouts, CodiMD, Obsidian, MkDocs, math, Mermaid, scroll sync, blocked pictures and picture sizes |
 | `data/` | The other bundled HTML, CSS, JS and the qrc |
 | `tests/` | Five test programs; the four that need a preview share `testhelpers.h` |
 

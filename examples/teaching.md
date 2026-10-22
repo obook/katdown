@@ -9,8 +9,11 @@
 > [!theorem]
 > For an arithmetic sequence, $u_n = u_0 + n r$.
 
-> [!property]
+> [!proposition]
 > The sum of the first $n+1$ terms is $\dfrac{(n+1)(u_0 + u_n)}{2}$.
+
+> [!corollary]
+> $1 + 2 + \dots + n = \dfrac{n(n+1)}{2}$.
 
 > [!proof]
 > By induction on $n$.
@@ -27,8 +30,11 @@
 > [!solution]
 > $u_{10} = 3 + 10 \times 2 = 23$.
 
-Each type also takes its French name, with or without accents: `théorème`,
-`propriété`, `démonstration`, `exercice`, `méthode`, `remarque`, `correction`.
+The types are those of the Academic Notes plugin for Obsidian, plus `method`:
+`lemma`, `axiom`, `claim`, `assumption`, `conjecture` and `hypothesis` work
+too. Its short names work as well: `def`, `thm`, `lem`, `prop`, `cor`, `pf`,
+`sol`... Each type also takes its French name, with or without accents:
+`théorème`, `lemme`, `propriété`, `démonstration`, `exercice`, `correction`...
 
 ## Picture size
 
