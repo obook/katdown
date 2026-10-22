@@ -1,3 +1,17 @@
+katemark (0.4.6) unstable; urgency=medium
+
+  * Add teaching callouts: definition, theorem, property, proof, exercise,
+    method, remark and solution, also under their French names.
+  * Size a picture with {width=50%} after it, as in Pandoc.
+  * Scale pasted images down to 1920 pixels wide.
+  * Say "Rendering" above the preview while a long document renders.
+  * Stop the white flash while a dark preview loads.
+  * Keep the PDF margins white when exporting from a dark preview.
+  * Leave the page number off a PDF of one page.
+  * Windows: ship the translations in the zip.
+
+ -- Olivier Booklage <olivier.booklage@ac-bordeaux.fr>  Thu, 22 Oct 2026 13:15:25 +0000
+
 katemark (0.4.5) unstable; urgency=medium
 
   * Security: raw HTML in a document could run script in the preview. The
