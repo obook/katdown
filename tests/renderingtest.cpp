@@ -66,7 +66,8 @@ void RenderingTest::rendersCodimdExtensions()
 }
 
 // Obsidian's additions: callouts with a type, a title and folding, wiki links, image
-// embeds with a width, and comments that stay out of the page.
+// embeds with a width, and comments that stay out of the page. Also the teaching
+// callouts and Pandoc's {width=...} after a picture.
 void RenderingTest::rendersObsidianSyntax()
 {
     KTextEditor::Document *doc = openDocument();
@@ -75,7 +76,8 @@ void RenderingTest::rendersObsidianSyntax()
     QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
     doc->setText(QStringLiteral("> [!faq]- Why *now*?\n> the folded answer\n\n> [!bug]\n> the bug line\n\n"
-                                "See [[Other Note|the other]] and ![[%1|40]] %%hidden words%% end.\n\n%%\na hidden block\n%%\n\nlast line\n")
+                                "See [[Other Note|the other]] and ![[%1|40]] %%hidden words%% end.\n\n%%\na hidden block\n%%\n\n"
+                                "> [!théorème]\n> a teaching block\n\n![](%1){width=50%} ![](%1){#fig:a width=\"30%\"} and ![](%1){.wide}\n\nlast line\n")
                      .arg(ImageName));
     QVERIFY(waitForPageText(preview.get(), QLatin1String("last line")));
     QCOMPARE(countElements(preview.get(), "details.markdown-alert:not([open]) > summary.markdown-alert-title > em"), 1);
@@ -85,6 +87,13 @@ void RenderingTest::rendersObsidianSyntax()
     QCOMPARE(waitForImageWidth(preview.get()), ImageWidth);
     const QString text = evalJs(preview.get(), QStringLiteral("document.getElementById('content').textContent"));
     QVERIFY(text.contains(QLatin1String("Bug")));
+    // A French teaching type takes its English title and the purple of GitHub's "important".
+    QCOMPARE(countElements(preview.get(), "div.markdown-alert-important > p.markdown-alert-title"), 1);
+    QVERIFY(text.contains(QLatin1String("Theorem")));
+    // Pandoc's size applies beside other attributes; braces with no size stay as text.
+    QCOMPARE(countElements(preview.get(), "img[style=\"width:50%;\"]"), 1);
+    QCOMPARE(countElements(preview.get(), "img[style=\"width:30%;\"]"), 1);
+    QVERIFY2(!text.contains(QLatin1String("width=")) && text.contains(QLatin1String("{.wide}")), qPrintable(text));
     QVERIFY(text.contains(QLatin1String("the other")));
     QVERIFY2(!text.contains(QLatin1String("hidden")), qPrintable(text));
 

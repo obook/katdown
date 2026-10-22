@@ -36,6 +36,15 @@
     danger: "caution",
     bug: "caution",
     quote: "quote",
+    // Teaching blocks, with the colors of the "Éditeur MD par lien" for teachers.
+    definition: "important",
+    theorem: "important",
+    property: "important",
+    proof: "warning",
+    exercise: "note",
+    method: "note",
+    remark: "note",
+    solution: "tip",
   };
   var ALIASES = {
     summary: "abstract",
@@ -50,15 +59,25 @@
     missing: "failure",
     error: "danger",
     cite: "quote",
+    // The French names, with or without their accents (see calloutLook).
+    theoreme: "theorem",
+    propriete: "property",
+    demonstration: "proof",
+    exercice: "exercise",
+    methode: "method",
+    remarque: "remark",
+    correction: "solution",
+    exemple: "example",
   };
 
   // What a block of a given type looks like: its color family, its icon, and the title
   // it shows when the author wrote none. An unknown type looks like a note, as in
   // Obsidian, and is titled with its own name.
   function calloutLook(name) {
-    var type = name;
-    if (Object.prototype.hasOwnProperty.call(ALIASES, name)) {
-      type = ALIASES[name];
+    // "théorème" and "theoreme" are the same type.
+    var type = name.normalize("NFD").replace(/\p{M}/gu, "");
+    if (Object.prototype.hasOwnProperty.call(ALIASES, type)) {
+      type = ALIASES[type];
     }
     if (!Object.prototype.hasOwnProperty.call(TONES, type)) {
       return { tone: "note", icon: ICONS.note, title: name.charAt(0).toUpperCase() + name.slice(1) };
@@ -77,7 +96,7 @@
   // "+" (expanded).
   function callouts(md, options) {
     // "[!type]", then "-" or "+" when the callout folds, then the title if there is one.
-    var OBSIDIAN_MARKER = /^\[!([\w-]+)\]([+-]?)(?:[ \t]+|$)/;
+    var OBSIDIAN_MARKER = /^\[!([\p{L}\d_-]+)\]([+-]?)(?:[ \t]+|$)/u;
     // GitHub knows five types, alone on their line: no folding and no title.
     var GITHUB_MARKER = /^\[!(note|tip|important|warning|caution)\]()[ \t]*$/i;
     var markerPattern = options && options.githubOnly ? GITHUB_MARKER : OBSIDIAN_MARKER;

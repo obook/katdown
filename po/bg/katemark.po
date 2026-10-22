@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-13 12:32+0200\n"
+"POT-Creation-Date: 2026-10-22 14:52+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Bulgarian\n"
@@ -60,7 +60,7 @@ msgstr ""
 "редактора / системата\" оцветява същото оформление според активната тема на "
 "редактора, така че прегледът се слива с останалата част от Kate."
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:180
+#: src/configpage.cpp:97 src/previewwidget.cpp:188
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Зареждане на прегледи на медия от отдалечени URL адреси"
@@ -138,7 +138,7 @@ msgid ""
 msgstr ""
 "Запазете документа, преди да поставите изображение: то се съхранява до него."
 
-#: src/imagepaste.cpp:39
+#: src/imagepaste.cpp:45
 #, kde-format
 msgid "Could not save the image to %1"
 msgstr "Изображението не може да бъде запазено в %1"
@@ -336,12 +336,60 @@ msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Цитат"
 
-#: src/previewwidget.cpp:104
+#: src/previewwidget.cpp:65
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Definition"
+msgstr ""
+
+#: src/previewwidget.cpp:66
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Theorem"
+msgstr ""
+
+#: src/previewwidget.cpp:67
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Property"
+msgstr ""
+
+#: src/previewwidget.cpp:68
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Proof"
+msgstr ""
+
+#: src/previewwidget.cpp:69
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Exercise"
+msgstr ""
+
+#: src/previewwidget.cpp:70
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Method"
+msgstr ""
+
+#: src/previewwidget.cpp:71
+#, fuzzy, kde-format
+msgctxt "@title teaching callout"
+msgid "Remark"
+msgstr "Katemark"
+
+#: src/previewwidget.cpp:72
+#, fuzzy, kde-format
+msgctxt "@title teaching callout"
+msgid "Solution"
+msgstr "Внимание"
+
+#: src/previewwidget.cpp:112
 #, kde-format
 msgid "GitHub only"
 msgstr "Само GitHub"
 
-#: src/previewwidget.cpp:105
+#: src/previewwidget.cpp:113
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
@@ -350,7 +398,7 @@ msgstr ""
 "Показване само на това, което показва GitHub, без синтаксиса на CodiMD, "
 "Obsidian и MkDocs"
 
-#: src/previewwidget.cpp:118
+#: src/previewwidget.cpp:126
 #, kde-format
 msgctxt ""
 "@info:status the preview is rendering a long document; one to three dots "

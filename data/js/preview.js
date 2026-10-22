@@ -90,6 +90,7 @@
     } else {
       md.use(katemark.wikiLinks);
       md.use(katemark.comments);
+      md.use(katemark.imageSize);
       // markdown-it plugins: ==mark==, ++ins++, H~2~O, 19^th^.
       md.use(window.markdownitMark);
       md.use(window.markdownitIns);

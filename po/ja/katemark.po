@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-13 12:32+0200\n"
+"POT-Creation-Date: 2026-10-22 14:52+0200\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Japanese\n"
@@ -60,7 +60,7 @@ msgstr ""
 "わせる」は、同じレイアウトを現在のエディタテーマの配色で表示するため、プレ"
 "ビューが Kate の他の部分となじみます。"
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:180
+#: src/configpage.cpp:97 src/previewwidget.cpp:188
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "リモート URL からメディアのプレビューを読み込む"
@@ -137,7 +137,7 @@ msgstr ""
 "画像を貼り付ける前にドキュメントを保存してください。画像はドキュメントと同じ"
 "場所に保存されます。"
 
-#: src/imagepaste.cpp:39
+#: src/imagepaste.cpp:45
 #, kde-format
 msgid "Could not save the image to %1"
 msgstr "画像を %1 に保存できませんでした"
@@ -335,12 +335,60 @@ msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "引用"
 
-#: src/previewwidget.cpp:104
+#: src/previewwidget.cpp:65
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Definition"
+msgstr ""
+
+#: src/previewwidget.cpp:66
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Theorem"
+msgstr ""
+
+#: src/previewwidget.cpp:67
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Property"
+msgstr ""
+
+#: src/previewwidget.cpp:68
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Proof"
+msgstr ""
+
+#: src/previewwidget.cpp:69
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Exercise"
+msgstr ""
+
+#: src/previewwidget.cpp:70
+#, kde-format
+msgctxt "@title teaching callout"
+msgid "Method"
+msgstr ""
+
+#: src/previewwidget.cpp:71
+#, fuzzy, kde-format
+msgctxt "@title teaching callout"
+msgid "Remark"
+msgstr "Katemark"
+
+#: src/previewwidget.cpp:72
+#, fuzzy, kde-format
+msgctxt "@title teaching callout"
+msgid "Solution"
+msgstr "注意"
+
+#: src/previewwidget.cpp:112
 #, kde-format
 msgid "GitHub only"
 msgstr "GitHub のみ"
 
-#: src/previewwidget.cpp:105
+#: src/previewwidget.cpp:113
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
@@ -349,7 +397,7 @@ msgstr ""
 "GitHub が表示するものだけを表示し、CodiMD、Obsidian、MkDocs の構文は使いませ"
 "ん"
 
-#: src/previewwidget.cpp:118
+#: src/previewwidget.cpp:126
 #, kde-format
 msgctxt ""
 "@info:status the preview is rendering a long document; one to three dots "

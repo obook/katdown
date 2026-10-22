@@ -62,6 +62,14 @@ QJsonObject calloutLabels()
         {QStringLiteral("bug"), i18nc("@title Obsidian callout", "Bug")},
         {QStringLiteral("example"), i18nc("@title Obsidian callout", "Example")},
         {QStringLiteral("quote"), i18nc("@title Obsidian callout", "Quote")},
+        {QStringLiteral("definition"), i18nc("@title teaching callout", "Definition")},
+        {QStringLiteral("theorem"), i18nc("@title teaching callout", "Theorem")},
+        {QStringLiteral("property"), i18nc("@title teaching callout", "Property")},
+        {QStringLiteral("proof"), i18nc("@title teaching callout", "Proof")},
+        {QStringLiteral("exercise"), i18nc("@title teaching callout", "Exercise")},
+        {QStringLiteral("method"), i18nc("@title teaching callout", "Method")},
+        {QStringLiteral("remark"), i18nc("@title teaching callout", "Remark")},
+        {QStringLiteral("solution"), i18nc("@title teaching callout", "Solution")},
     };
 }
 } // namespace
