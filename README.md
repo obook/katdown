@@ -122,7 +122,7 @@ source before, [uninstall](#uninstall) it first.
    the right of the editor.
 
 The documents in [`examples/`](examples) show what the preview renders:
-`github.md`, `codimd.md`, `obsidian.md` and `mkdocs.md`.
+`github.md`, `codimd.md`, `obsidian.md`, `mkdocs.md` and `teaching.md`.
 
 ## Using the preview
 
