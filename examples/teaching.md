@@ -2,7 +2,7 @@
 
 ## Callouts
 
-> [!definition] Arithmetic sequence
+> [!definition]
 > A sequence where each term is the previous one plus a fixed number $r$:
 > $u_{n+1} = u_n + r$.
 
@@ -15,7 +15,7 @@
 > [!proof]
 > By induction on $n$.
 
-> [!method] Showing a sequence is arithmetic
+> [!method]
 > Compute $u_{n+1} - u_n$ and check that it does not depend on $n$.
 
 > [!remark]
@@ -24,7 +24,7 @@
 > [!exercise]
 > $u_0 = 3$ and $r = 2$. Compute $u_{10}$.
 
-> [!solution]- Solution
+> [!solution]
 > $u_{10} = 3 + 10 \times 2 = 23$.
 
 Each type also takes its French name, with or without accents: `théorème`,
