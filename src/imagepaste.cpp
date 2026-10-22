@@ -34,7 +34,13 @@ bool pasteClipboardImage(KTextEditor::View *view, QString *error)
     const QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmsszzz"));
     const QString name = QStringLiteral("image-%1.png").arg(timestamp);
     const QString path = QFileInfo(url.toLocalFile()).absolutePath() + QLatin1Char('/') + name;
-    const QImage image = qvariant_cast<QImage>(mime->imageData());
+    QImage image = qvariant_cast<QImage>(mime->imageData());
+    // A full-screen capture from a high-density screen weighs megabytes for nothing. Only
+    // the width is capped: a tall capture of a whole page must stay readable.
+    constexpr int MaxWidth = 1920;
+    if (image.width() > MaxWidth) {
+        image = image.scaledToWidth(MaxWidth, Qt::SmoothTransformation);
+    }
     if (!image.save(path, "PNG")) {
         *error = i18n("Could not save the image to %1", path);
         return false;

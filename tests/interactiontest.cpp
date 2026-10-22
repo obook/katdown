@@ -12,6 +12,7 @@
 
 #include <QClipboard>
 #include <QDir>
+#include <QFile>
 #include <QImage>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -102,6 +103,18 @@ void InteractionTest::pastesClipboardImage()
     QCOMPARE(saved.size(), 1);
     QVERIFY(doc->line(0).startsWith(QStringLiteral("![](%1)").arg(saved.first())));
     QCOMPARE(QImage(m_dir.filePath(saved.first())).size(), image.size());
+
+    // A picture wider than 1920 pixels is scaled down, keeping its proportions.
+    for (const QString &file : saved) {
+        QFile::remove(m_dir.filePath(file));
+    }
+    QImage large(3840, 1000, QImage::Format_RGB32);
+    large.fill(Qt::red);
+    QGuiApplication::clipboard()->setImage(large);
+    QVERIFY2(pasteClipboardImage(view, &error), qPrintable(error));
+    const QStringList scaled = QDir(m_dir.path()).entryList({QStringLiteral("image-*.png")});
+    QCOMPARE(scaled.size(), 1);
+    QCOMPARE(QImage(m_dir.filePath(scaled.first())).size(), QSize(1920, 500));
 
     // The link replaces the selected text, as any paste does.
     doc->setText(QStringLiteral("replace me\n"));
