@@ -30,9 +30,8 @@
 > [!solution]
 > $u_{10} = 3 + 10 \times 2 = 23$.
 
-The types are those of the Academic Notes plugin for Obsidian, plus `method`:
 `lemma`, `axiom`, `claim`, `assumption`, `conjecture` and `hypothesis` work
-too. Its short names work as well: `def`, `thm`, `lem`, `prop`, `cor`, `pf`,
+too, and so do short names: `def`, `thm`, `lem`, `prop`, `cor`, `pf`,
 `sol`... Each type also takes its French name, with or without accents:
 `théorème`, `lemme`, `propriété`, `démonstration`, `exercice`, `correction`...
 

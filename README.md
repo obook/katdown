@@ -152,16 +152,16 @@ The documents in [`examples/`](examples) show what the preview renders:
 
 ## Supported syntax
 
-| Family | Syntax |
-|---|---|
-| GitHub | Tables, task lists (`- [ ]`), alerts (`> [!NOTE]`), `~~strikethrough~~`, bare links, highlighted code blocks, YAML front matter |
-| [markdown-it](https://github.com/markdown-it/markdown-it) plugins | `==mark==` ([mark](https://github.com/markdown-it/markdown-it-mark)), `++ins++` ([ins](https://github.com/markdown-it/markdown-it-ins)), `H~2~O` ([sub](https://github.com/markdown-it/markdown-it-sub)), `19^th^` ([sup](https://github.com/markdown-it/markdown-it-sup)), footnotes ([footnote](https://github.com/markdown-it/markdown-it-footnote)), emoji by name such as `:warning:` ([emoji](https://github.com/markdown-it/markdown-it-emoji)) |
-| [CodiMD](https://github.com/hackmdio/codimd) | `:::success`, `:::info`, `:::warning` and `:::danger` alert areas, also under the Docusaurus names `note`, `tip` and `caution`; `:::spoiler`; `[TOC]` |
-| Obsidian | Callouts (`> [!faq]- Title`) with every type and alias, custom titles and folding; wiki links (`[[Note]]`, `[[Note\|label]]`, `[[Note#Heading]]`); image embeds with a size (`![[image.png\|300]]`); `%%comments%%` |
-| MkDocs | `!!! note "Title"` admonitions with an indented body, `??? note` for a folded one, `???+ note` for one that starts open |
-| Teaching | Callouts for the environments of the [Academic Notes](https://github.com/Kristal-Boltinn/academic-notes/wiki/Mathematical-environments) plugin for Obsidian (`definition`, `theorem`, `lemma`, `proposition`, `corollary`, `proof`, `exercise`, `solution`, `remark`...) and their short names (`def`, `thm`, `pf`...), plus `method`; also under their French names, with or without accents (`théorème`, `propriété`, `démonstration`, `correction`...); a picture's size in Pandoc's way, `![](image.png){width=50%}` |
-| Math | `$...$`, `$$...$$`, `\(...\)` and `\[...\]`, rendered by [KaTeX](https://github.com/KaTeX/KaTeX) |
-| Diagrams | [Mermaid](https://github.com/mermaid-js/mermaid) in ` ```mermaid ` blocks |
+| Family | Syntax | Also understood by |
+|---|---|---|
+| GitHub | Tables, task lists (`- [ ]`), alerts (`> [!NOTE]`), `~~strikethrough~~`, bare links, highlighted code blocks, YAML front matter | Alerts: Obsidian, [VitePress](https://vitepress.dev/guide/markdown), GitLab |
+| [markdown-it](https://github.com/markdown-it/markdown-it) plugins | `==mark==` ([mark](https://github.com/markdown-it/markdown-it-mark)), `++ins++` ([ins](https://github.com/markdown-it/markdown-it-ins)), `H~2~O` ([sub](https://github.com/markdown-it/markdown-it-sub)), `19^th^` ([sup](https://github.com/markdown-it/markdown-it-sup)), footnotes ([footnote](https://github.com/markdown-it/markdown-it-footnote)), emoji by name such as `:warning:` ([emoji](https://github.com/markdown-it/markdown-it-emoji)) | |
+| [CodiMD](https://github.com/hackmdio/codimd) | `:::success`, `:::info`, `:::warning` and `:::danger` alert areas, also under the Docusaurus names `note`, `tip` and `caution`; `:::spoiler`; `[TOC]` | Alert areas: HackMD, [Docusaurus](https://docusaurus.io/docs/markdown-features/admonitions) (`:::note[Title]`), [VitePress](https://vitepress.dev/guide/markdown) (`::: info`) |
+| Obsidian | Callouts (`> [!faq]- Title`) with every type and alias, custom titles and folding; wiki links (`[[Note]]`, `[[Note\|label]]`, `[[Note#Heading]]`); image embeds with a size (`![[image.png\|300]]`); `%%comments%%` | |
+| MkDocs | `!!! note "Title"` admonitions with an indented body, `??? note` for a folded one, `???+ note` for one that starts open | Python-Markdown's `admonition` extension, Material for MkDocs; `???` comes from `pymdownx.details` |
+| Teaching | Callouts `definition`, `theorem`, `lemma`, `proposition`, `corollary`, `proof`, `exercise`, `solution`, `remark`... and their short names (`def`, `thm`, `pf`...), plus `method`; also under their French names, with or without accents (`théorème`, `propriété`, `démonstration`, `correction`...); a picture's size, `![](image.png){width=50%}` | Callouts: the Obsidian plugin [Academic Notes](https://github.com/Kristal-Boltinn/academic-notes/wiki/Mathematical-environments); sizes: Pandoc |
+| Math | `$...$`, `$$...$$`, `\(...\)` and `\[...\]`, rendered by [KaTeX](https://github.com/KaTeX/KaTeX) | |
+| Diagrams | [Mermaid](https://github.com/mermaid-js/mermaid) in ` ```mermaid ` blocks | |
 
 - Obsidian links resolve against the folder of the document, not across a
   vault.
