@@ -70,7 +70,8 @@ outside project. Katemark would have to come in through KDE:
       agreed to LGPL-2.0-or-later for the code Katemark uses
       ([issue](https://github.com/uwuclxdy/katdown/issues/3)). The question
       to the maintainers is open on
-      [KDE Discuss](https://discuss.kde.org/t/katemark-a-markdown-preview-for-kate-beside-the-editor-with-scroll-sync/50674/21).
+      [KDE Discuss](https://discuss.kde.org/t/katemark-a-markdown-preview-for-kate-beside-the-editor-with-scroll-sync/50674/21)
+      and, since 2026-10-16, in the `#kate:kde.org` Matrix room.
 - [ ] Otherwise apply to the
       [KDE incubator](https://community.kde.org/Incubator). Katemark
       becomes a KDE project and neon builds it.
