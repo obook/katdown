@@ -60,7 +60,8 @@ tab of its own.
 | Any other Linux | [Build from source](#build-from-source) |
 | Kubuntu 24.04 | Not possible: its Kate still uses KDE Frameworks 5 |
 
-Kate has to be a KDE Frameworks 6 build, with Qt 6.5 or later.
+Kate has to be a KDE Frameworks 6 build, with Qt 6.5 or later. If you
+installed Katemark from source before, [uninstall](#uninstall) it first.
 
 ### Debian package
 
@@ -110,8 +111,7 @@ cd katemark-git
 makepkg -si
 ```
 
-`sudo pacman -R katemark-git` uninstalls it. If you installed Katemark from
-source before, [uninstall](#uninstall) it first.
+`sudo pacman -R katemark-git` uninstalls it.
 
 ### openSUSE
 
@@ -124,8 +124,7 @@ sudo zypper install katemark
 ```
 
 On Leap 16.0, write `openSUSE_Leap_16.0` instead of `openSUSE_Tumbleweed`.
-`sudo zypper remove katemark` uninstalls it. If you installed Katemark from
-source before, [uninstall](#uninstall) it first.
+`sudo zypper remove katemark` uninstalls it.
 
 ## First steps
 
