@@ -55,6 +55,7 @@ tab of its own.
 | Kubuntu 26.04 | [Install the package](#debian-package) `katemark_<version>_ubuntu26.04_amd64.deb` |
 | Windows | [Install the zip](#windows) `katemark-<version>-windows-x86_64.zip` |
 | Arch Linux | [Install from the AUR](#arch-linux) `katemark-git` |
+| openSUSE Tumbleweed, Leap 16.0 | [Install from KDE:Extra](#opensuse) `katemark` |
 | Another Debian or Ubuntu release | [Build the package](#build-from-source) with `build.sh` |
 | Any other Linux | [Build from source](#build-from-source) |
 | Kubuntu 24.04 | Not possible: its Kate still uses KDE Frameworks 5 |
@@ -110,6 +111,20 @@ makepkg -si
 ```
 
 `sudo pacman -R katemark-git` uninstalls it. If you installed Katemark from
+source before, [uninstall](#uninstall) it first.
+
+### openSUSE
+
+Katemark is in the `KDE:Extra` repository. On Tumbleweed:
+
+```bash
+sudo zypper addrepo https://download.opensuse.org/repositories/KDE:/Extra/openSUSE_Tumbleweed/KDE:Extra.repo
+sudo zypper refresh
+sudo zypper install katemark
+```
+
+On Leap 16.0, write `openSUSE_Leap_16.0` instead of `openSUSE_Tumbleweed`.
+`sudo zypper remove katemark` uninstalls it. If you installed Katemark from
 source before, [uninstall](#uninstall) it first.
 
 ## First steps
@@ -318,8 +333,8 @@ Original project: [Katdown](https://github.com/uwuclxdy/katdown) by uwuclxdy
 
 Matija Šuklje maintains the Arch Linux package.
 
-Olivier Belleux (Wolfheri) maintains the openSUSE package, submitted to
-`KDE:Extra`.
+Olivier Belleux (Wolfheri) made the openSUSE package and Christophe Marin
+added it to `KDE:Extra`.
 
 Bundled libraries:
 

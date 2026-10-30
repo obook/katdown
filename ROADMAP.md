@@ -5,7 +5,8 @@ Ideas and open work, not scheduled yet.
 ## Distribution packages
 
 Today CPack makes the `.deb` files and they sit on the GitHub release page,
-so nobody gets an update through `apt`.
+so nobody gets an update through `apt`. openSUSE Tumbleweed and Leap 16.0
+users get Katemark from `KDE:Extra`.
 
 ### Ubuntu, through Debian
 
