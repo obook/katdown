@@ -210,6 +210,7 @@ void PreviewWidget::attachDocument(KTextEditor::Document *doc, KTextEditor::View
         m_doc->disconnect(this);
     }
     m_doc = doc;
+    m_reloadsLeft = ReloadsAfterCrash;
     if (doc) {
         connect(doc, &KTextEditor::Document::textChanged, this, &PreviewWidget::scheduleRender);
         connect(doc, &KTextEditor::Document::documentUrlChanged, this, &PreviewWidget::onDocumentUrlChanged);
@@ -250,11 +251,15 @@ PreviewWidget::~PreviewWidget()
     m_guard = nullptr;
 }
 
+// The addresses a pasted link may have (markdownedit.cpp), files aside: a link in a
+// document must not start whatever program the system has for "smb:", "steam:" or
+// "search-ms:", which a browser would first ask about.
 void PreviewWidget::openLink(const QUrl &url)
 {
+    static const QStringList openable{QStringLiteral("http"), QStringLiteral("https"), QStringLiteral("ftp"), QStringLiteral("mailto")};
     if (url.isLocalFile() && m_mainWindow) {
         m_mainWindow->openUrl(localLinkTarget(url, baseUrl()));
-    } else if (!url.scheme().isEmpty()) {
+    } else if (openable.contains(url.scheme())) {
         QDesktopServices::openUrl(url);
     }
 }
@@ -334,9 +339,16 @@ void PreviewWidget::addExportActions(const QList<QAction *> &actions)
 
 void PreviewWidget::scheduleRender()
 {
-    if (!m_paused) {
-        m_debounce->start();
+    if (m_paused) {
+        return;
     }
+    // A page whose render process died stays blank: the next edit loads it again.
+    if (!m_loaded && !m_web->page()->isLoading() && m_reloadsLeft > 0) {
+        --m_reloadsLeft;
+        loadPage();
+        return;
+    }
+    m_debounce->start();
 }
 
 void PreviewWidget::setPaused(bool paused)

@@ -146,8 +146,7 @@ The documents in [`examples/`](examples) show what the preview renders:
 | See the document as GitHub will show it | Check **GitHub only** above the preview |
 | Export what the preview shows | The **PDF** and **HTML** buttons above the preview, or Tools > Export Preview as PDF and Tools > Export Preview as HTML |
 | Follow a link | Click it: a local file opens in Kate, a web address in your browser, a link to a heading scrolls the preview. Point at it to see where it goes |
-| Zoom the preview | <kbd>Ctrl</kbd> + mouse wheel over it |
-| Zoom a Mermaid diagram | <kbd>Ctrl</kbd> + mouse wheel over it; a double click puts it back |
+| Zoom the preview, diagrams included | <kbd>Ctrl</kbd> + mouse wheel over it; <kbd>Ctrl</kbd>+<kbd>0</kbd> or **Reset Zoom** in its context menu puts it back to 100% |
 | Paste a picture | Copy an image, then paste in the editor |
 
 - The preview follows the active Markdown document. It keeps its last

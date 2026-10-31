@@ -32,6 +32,7 @@ private Q_SLOTS:
     void agreesWithGithubOnDatesAndAnchors();
     void keepsMathOnItsFeet();
     void saysWhenARenderTakesLong();
+    void survivesElementsNamedLikeDocumentMethods();
 };
 
 // The libraries tested here come from qrc rather than the inlined page: the markdown-it plugins
@@ -54,13 +55,28 @@ void RenderingTest::rendersCodimdExtensions()
     QVERIFY2(quote.contains(QLatin1String(":smile:")), qPrintable(quote));
     QTRY_COMPARE_WITH_TIMEOUT(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('pre.mermaid svg').length")), QStringLiteral("1"), PageTimeoutMs);
 
-    // Ctrl + wheel over the diagram zooms it.
-    const QString width = QStringLiteral("document.querySelector('pre.mermaid svg').getBoundingClientRect().width");
-    const double before = evalJs(preview.get(), width).toDouble();
-    evalJs(preview.get(),
-           QStringLiteral("document.querySelector('pre.mermaid svg').dispatchEvent("
-                          "new WheelEvent('wheel', { deltaY: -100, ctrlKey: true, bubbles: true, cancelable: true })); 1"));
-    QVERIFY(evalJs(preview.get(), width).toDouble() > before);
+    // A notch of Ctrl + wheel over the diagram zooms the whole article; half a notch, as a
+    // touchpad sends, does not yet. Ctrl+0 puts it back, "à" on a French keyboard.
+    const QString zoom = QStringLiteral("getComputedStyle(document.getElementById('content')).zoom");
+    const QString halfNotch = QStringLiteral("document.querySelector('pre.mermaid svg').dispatchEvent("
+                                             "new WheelEvent('wheel', { deltaY: -50, wheelDeltaY: 60, ctrlKey: true, bubbles: true, cancelable: true })); 1");
+    evalJs(preview.get(), halfNotch);
+    QCOMPARE(evalJs(preview.get(), zoom), QStringLiteral("1"));
+    evalJs(preview.get(), halfNotch);
+    QVERIFY2(evalJs(preview.get(), zoom).toDouble() > 1, qPrintable(evalJs(preview.get(), zoom)));
+
+    // The zoom outlives a reload of the page, which a change of this setting asks for.
+    const auto restore = qScopeGuard([remote = Settings::self()->loadRemoteMedia()]() {
+        Settings::self()->setLoadRemoteMedia(remote);
+    });
+    evalJs(preview.get(), QStringLiteral("window.beforeReload = true; 1"));
+    Settings::self()->setLoadRemoteMedia(!Settings::self()->loadRemoteMedia());
+    QTRY_COMPARE_WITH_TIMEOUT(evalJs(preview.get(), QStringLiteral("String(window.beforeReload)")), QStringLiteral("undefined"), PageTimeoutMs);
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("the boxed line")));
+    QVERIFY2(evalJs(preview.get(), zoom).toDouble() > 1, qPrintable(evalJs(preview.get(), zoom)));
+
+    evalJs(preview.get(), QStringLiteral("document.dispatchEvent(new KeyboardEvent('keydown', { key: '\\u00e0', code: 'Digit0', ctrlKey: true })); 1"));
+    QCOMPARE(evalJs(preview.get(), zoom), QStringLiteral("1"));
 
     delete doc;
 }
@@ -185,6 +201,13 @@ void RenderingTest::keepsFoldingAndUniqueIds()
     QVERIFY(waitForPageText(preview.get(), QLatin1String("second version")));
     QCOMPARE(countElements(preview.get(), "details[open]"), 1);
 
+    // The reader folds it again, then the author makes it open by default: the source has
+    // the last word on the folding it changed.
+    evalJs(preview.get(), QStringLiteral("document.querySelector('details').open = false; 1"));
+    doc->setText(QString(source).replace(QLatin1String("[!faq]-"), QLatin1String("[!faq]+")) + QStringLiteral("\nthird version\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("third version")));
+    QCOMPARE(countElements(preview.get(), "details[open]"), 1);
+
     delete doc;
 }
 
@@ -281,8 +304,10 @@ void RenderingTest::rendersGithubOnly()
     delete doc;
 }
 
-// Two details where the page has to agree with GitHub: a date of the front matter shows as
-// it is written, and every space of a title counts in the id of its heading.
+// Details where the page has to agree with GitHub: a date of the front matter shows as it
+// is written, every space of a title counts in the id of its heading and a formula in a
+// title counts once, as the reader sees it. The table of contents and a wiki link to a
+// heading follow the same ids.
 void RenderingTest::agreesWithGithubOnDatesAndAnchors()
 {
     KTextEditor::Document *doc = openDocument();
@@ -290,10 +315,14 @@ void RenderingTest::agreesWithGithubOnDatesAndAnchors()
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
     QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
 
-    doc->setText(QStringLiteral("---\ndate: 2026-10-03\n---\n\n## Foo & Bar\n\nthe last line\n"));
+    doc->setText(QStringLiteral("---\ndate: 2026-10-03\n---\n\n## Foo & Bar\n\n## Formula $E=mc^2$\n\n## _Big_ deal\n\n[TOC]\n\n[[#_Big_ deal]]\n\nthe last line\n"));
     QVERIFY(waitForPageText(preview.get(), QLatin1String("the last line")));
     QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('table td:last-child').textContent")), QStringLiteral("2026-10-03"));
-    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('h2').id")), QStringLiteral("foo--bar"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('h2')[0].id")), QStringLiteral("foo--bar"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('h2')[1].id")), QStringLiteral("formula-emc2"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('.toc a')[1].textContent")), QStringLiteral("Formula E=mc2"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelector('a.wikilink').getAttribute('href')")), QStringLiteral("#big-deal"));
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("document.querySelectorAll('h2')[2].id")), QStringLiteral("big-deal"));
 
     delete doc;
 }
@@ -345,6 +374,27 @@ void RenderingTest::saysWhenARenderTakesLong()
     QTRY_COMPARE_WITH_TIMEOUT(busy->text(), QStringLiteral("Rendering.."), ReactionTimeoutMs);
     QVERIFY(waitForPageText(preview.get(), QLatin1String("rendered late")));
     QTRY_VERIFY_WITH_TIMEOUT(busy->text().isEmpty(), ReactionTimeoutMs);
+}
+
+// <img name="getElementById"> in a document hides document.getElementById ("DOM
+// clobbering"). The page must keep rendering, and the export must still see its pictures.
+void RenderingTest::survivesElementsNamedLikeDocumentMethods()
+{
+    KTextEditor::Document *doc = openDocument();
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+
+    const QString source = QStringLiteral("<img name=\"getElementById\" src=\"\"><img name=\"createElement\" src=\"\"><img name=\"images\" src=\"\">\n\n"
+                                          "## Title\n\n[TOC]\n\n");
+    doc->setText(source + QStringLiteral("first version\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("first version")));
+    doc->setText(source + QStringLiteral("second version\n"));
+    QVERIFY(waitForPageText(preview.get(), QLatin1String("second version")));
+    QCOMPARE(countElements(preview.get(), ".toc a"), 1);
+    QCOMPARE(evalJs(preview.get(), QStringLiteral("String(window.__settled())")), QStringLiteral("true"));
+
+    delete doc;
 }
 
 QTEST_MAIN(RenderingTest)

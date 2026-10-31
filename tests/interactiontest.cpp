@@ -139,12 +139,16 @@ void InteractionTest::pastesClipboardImage()
 }
 
 // A picture on the web stays out until the setting allows it. The "web" here is a server
-// on this machine that answers every request with the small red picture.
+// on this machine that answers every request with the small red picture. While pictures
+// are kept out, no request reaches it, not even for a CSS background, which the page
+// does not replace.
 void InteractionTest::loadsRemoteImageOnlyWhenAllowed()
 {
     QTcpServer server;
     QVERIFY(server.listen(QHostAddress::LocalHost));
-    connect(&server, &QTcpServer::newConnection, &server, [&server]() {
+    int requests = 0;
+    connect(&server, &QTcpServer::newConnection, &server, [&server, &requests]() {
+        ++requests;
         QTcpSocket *socket = server.nextPendingConnection();
         connect(socket, &QTcpSocket::readyRead, socket, [socket]() {
             socket->readAll();
@@ -152,7 +156,9 @@ void InteractionTest::loadsRemoteImageOnlyWhenAllowed()
             socket->disconnectFromHost();
         });
     });
-    const QString source = QStringLiteral("<div style=\"text-align:center\">\n    <img width=\"20%\" src=\"http://127.0.0.1:%1/red.png\">\n</div>\n\nthe last line\n").arg(server.serverPort());
+    const QString source = QStringLiteral("<div style=\"text-align:center\">\n    <img width=\"20%\" src=\"http://127.0.0.1:%1/red.png\">\n</div>\n\n"
+                                          "<div style=\"background-image:url(http://127.0.0.1:%1/bg.png)\">x</div>\n\nthe last line\n")
+                               .arg(server.serverPort());
 
     Settings::self()->setLoadRemoteMedia(false);
     KTextEditor::Document *doc = openDocument();
@@ -165,6 +171,8 @@ void InteractionTest::loadsRemoteImageOnlyWhenAllowed()
     QCOMPARE(evalJs(preview.get(), QStringLiteral("document.images.length")), QStringLiteral("0"));
     const QString note = evalJs(preview.get(), QStringLiteral("document.querySelector('.blocked-media').textContent"));
     QVERIFY2(note.contains(QLatin1String("Load media previews from remote URLs")) && note.contains(QLatin1String("/red.png")), qPrintable(note));
+    QTest::qWait(500); // time for a request to arrive, were one let through
+    QCOMPARE(requests, 0);
 
     Settings::self()->setLoadRemoteMedia(true);
     QCOMPARE(waitForImageWidth(preview.get()), ImageWidth);

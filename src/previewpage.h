@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "previewutil.h"
+
 #include <QDir>
 #include <QFileInfo>
 #include <QMetaObject>
@@ -39,6 +41,12 @@ public:
     // it copies a picture into the exported file.
     bool allows(const QString &localFile) const
     {
+        // Refused before any access to the disk, which would reach the other machine.
+        // shortcut: a document opened from a network path loses its pictures too. Allow
+        // the share of the document folder if that is ever needed.
+        if (isNetworkPath(localFile)) {
+            return false;
+        }
         const QString path = QFileInfo(localFile).canonicalFilePath();
         return !m_root.isEmpty() && !path.isEmpty() && (path == m_root || path.startsWith(m_root + QLatin1Char('/')));
     }

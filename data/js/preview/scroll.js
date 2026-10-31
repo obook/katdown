@@ -34,17 +34,22 @@
 
   // Footnotes are left out: they render at the end of the page whatever line they were
   // written on.
-  var BLOCKS = "#content [data-line]:not(.footnotes *)";
+  var BLOCKS = "[data-line]:not(.footnotes *)";
 
   // Distance between two probes when looking for the block at the top of the viewport.
   var PROBE_STEP_PX = 8;
+
+  // Before Chromium 128 (Qt 6.8 and older), the box of an element under the CSS zoom of
+  // zoom.js comes unzoomed, while the page scrolls in zoomed pixels.
+  var chromium = /Chrome\/(\d+)/.exec(navigator.userAgent);
+  var unzoomedBoxes = chromium !== null && Number(chromium[1]) < 128;
 
   // Where the last scroll asked by the host left the page. A scroll that ends anywhere
   // else was made by the user.
   var hostScrollY = null;
 
   function maxScroll() {
-    return document.documentElement.scrollHeight - window.innerHeight;
+    return katemark.root.scrollHeight - window.innerHeight;
   }
 
   function scrollForHost(y) {
@@ -68,7 +73,7 @@
     // ponytail: every block is looked at on each scroll of the editor. Keep the list
     // from one render to the next and search it by halves if long documents lag.
     var block = null;
-    document.querySelectorAll(BLOCKS).forEach(function (candidate) {
+    katemark.byId("content").querySelectorAll(BLOCKS).forEach(function (candidate) {
       if (Number(candidate.dataset.line) <= line) {
         block = candidate;
       }
@@ -81,7 +86,8 @@
     var lineCount = Math.max(1, Number(block.dataset.lineEnd) - firstLine);
     var progress = Math.min(1, (line - firstLine) / lineCount);
     var box = block.getBoundingClientRect();
-    scrollForHost(window.scrollY + box.top + progress * box.height);
+    var scale = unzoomedBoxes ? katemark.zoomFactor() : 1;
+    scrollForHost(window.scrollY + (box.top + progress * box.height) * scale);
   };
 
   // Source line at the top of the viewport: fractional, -1 at the end of the page. Null
@@ -99,7 +105,7 @@
     }
     // The top edge can fall in the margin between two blocks; probe downwards for one.
     for (var y = 0; y < window.innerHeight; y += PROBE_STEP_PX) {
-      var element = document.elementFromPoint(window.innerWidth / 2, y);
+      var element = katemark.elementFromPoint(window.innerWidth / 2, y);
       var block = element && element.closest(BLOCKS);
       if (block) {
         var firstLine = Number(block.dataset.line);

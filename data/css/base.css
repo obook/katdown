@@ -21,6 +21,7 @@ body {
   margin: 0;
   padding: 32px 32px 96px;
   background: var(--bgColor-default);
+  zoom: var(--pv-zoom, 1); /* the zoom of the preview, set by zoom.js */
 }
 
 /* "GitHub only" shows what GitHub shows, column width included. */
@@ -100,10 +101,6 @@ html[data-pv-scheme="dark"] .markdown-body .alert-danger {
   --alert-border: rgba(169, 68, 66, 0.6);
 }
 
-.markdown-body details > summary {
-  cursor: pointer;
-}
-
 .markdown-body ul.toc {
   list-style: none;
   padding-left: 0;
@@ -151,6 +148,7 @@ html[data-pv-scheme="dark"] .markdown-body .alert-danger {
   .markdown-body {
     max-width: none;
     padding: 0;
+    zoom: 1 !important; /* the zoom of the preview (zoom.js) stays off the page */
   }
 
   .markdown-body .alert,
@@ -161,13 +159,9 @@ html[data-pv-scheme="dark"] .markdown-body .alert-danger {
   }
 }
 
-/* Obsidian callouts reuse GitHub's alert styles; these are the two additions. */
+/* Obsidian callouts reuse GitHub's alert styles; these are the additions. */
 .markdown-body .markdown-alert.markdown-alert-quote .markdown-alert-title {
   color: var(--fgColor-muted);
-}
-
-.markdown-body details.markdown-alert > summary.markdown-alert-title {
-  cursor: pointer;
 }
 
 .markdown-body details.markdown-alert > summary.markdown-alert-title::after {

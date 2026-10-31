@@ -86,17 +86,17 @@
   var TOC_INDENT_EM = 1.5;
 
   function buildToc(headings, maxLevel) {
-    var list = document.createElement("ul");
+    var list = katemark.createElement("ul");
     list.className = "toc";
     headings.forEach(function (heading) {
       var level = Number(heading.tagName.charAt(1)); // "H2" -> 2
       if (level > maxLevel) {
         return;
       }
-      var link = document.createElement("a");
+      var link = katemark.createElement("a");
       link.href = "#" + encodeURIComponent(heading.id);
-      link.textContent = heading.textContent;
-      var item = document.createElement("li");
+      link.textContent = katemark.shownText(heading);
+      var item = katemark.createElement("li");
       item.style.marginLeft = (level - 1) * TOC_INDENT_EM + "em";
       item.appendChild(link);
       list.appendChild(item);

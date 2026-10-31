@@ -12,6 +12,7 @@
 //   __scrollToLine(line, atEnd) / __topLine()   scroll sync (preview/scroll.js)
 //   __settled() / __exportBody()                used by the PDF and HTML exports
 //   __setPageNumbers(on)     number the pages of a PDF, or not
+//   __resetZoom()            put the preview back to 100% (preview/zoom.js)
 //
 // The syntax extensions live in preview/*.js, which add themselves to window.katemark
 // before this file runs.
@@ -54,6 +55,9 @@
       return true;
     });
   }
+
+  // texmath keeps the engine it was first given, so both parsers share this one.
+  var mathEngine = katemark.lenientMath();
 
   // One parser per mode: the full one, and the one that reads GitHub's syntax alone.
   function buildParser(githubOnly) {
@@ -103,7 +107,7 @@
     // ":/" into emoji, which bites in ordinary text, so they are off.
     md.use(window.markdownitEmoji, { shortcuts: {} });
     // Math between $...$ and $$...$$, and between \(...\) and \[...\] as in LaTeX.
-    md.use(window.texmath, { engine: katemark.lenientMath(), delimiters: ["dollars", "brackets"], katexOptions: katemark.mathOptions });
+    md.use(window.texmath, { engine: mathEngine, delimiters: ["dollars", "brackets"], katexOptions: katemark.mathOptions });
     if (!githubOnly) {
       md.use(katemark.codimdContainers);
       md.use(katemark.admonitions);
@@ -115,6 +119,9 @@
   var parsers = { all: buildParser(false), github: null };
   var githubOnly = false;
   var current = "";
+  // How the source folded each <details> block at the last render: "-" or "+" after a
+  // callout, "???" or "???+", <details open>.
+  var sourceFolds = [];
 
   // Which <details> blocks (foldable callouts, spoilers) are open, in document order.
   function foldStates(article) {
@@ -123,23 +130,23 @@
     });
   }
 
-  // Put back the folding the reader chose. Skipped when the number of blocks changed:
-  // the states would no longer line up with the right blocks.
-  function restoreFoldStates(article, states) {
+  // Put back the folding the reader chose, except on a block whose folding the source
+  // changed ("-" made "+"). Skipped when the number of blocks changed: the states would
+  // no longer line up with the right blocks.
+  function restoreFoldStates(article, readerFolds, newSourceFolds) {
     var blocks = article.querySelectorAll("details");
-    if (blocks.length !== states.length) {
+    if (blocks.length !== readerFolds.length || blocks.length !== sourceFolds.length) {
       return;
     }
     blocks.forEach(function (block, index) {
-      block.open = states[index];
+      if (newSourceFolds[index] === sourceFolds[index]) {
+        block.open = readerFolds[index];
+      }
     });
   }
 
   function rerender() {
-    var el = document.getElementById("content");
-    if (!el) {
-      return;
-    }
+    var el = katemark.byId("content");
     var folds = foldStates(el);
     katemark.resetMath();
     var tableHtml = "";
@@ -156,29 +163,35 @@
     }
     var md = githubOnly ? parsers.github : parsers.all;
     el.innerHTML = tableHtml + md.render(body, { lineOffset: lineOffset });
+    var newSourceFolds = foldStates(el);
     katemark.assignHeadingIds(el);
     if (!githubOnly) {
       katemark.fillToc(el);
     }
     katemark.drawMermaid(el);
     katemark.explainBlockedMedia(el);
-    restoreFoldStates(el, folds);
+    restoreFoldStates(el, folds, newSourceFolds);
+    sourceFolds = newSourceFolds;
   }
 
   // The rendered article for an HTML export, cleaned on a copy: the page is left as is.
   window.__exportBody = function () {
-    var copy = document.getElementById("content").cloneNode(true);
+    var copy = katemark.byId("content").cloneNode(true);
     // Raw HTML of the source may hold scripts, a <meta> that sends the reader elsewhere
     // or a <base> that moves every link. None acts in the preview; all would in the file.
     copy.querySelectorAll("script, meta, base").forEach(function (element) {
       element.remove();
     });
+    // Through the prototype: in <form><input name="attributes"></form> the field hides the
+    // form's own "attributes", and its onclick would stay.
+    var attributeNames = Element.prototype.getAttributeNames;
+    var removeAttribute = Element.prototype.removeAttribute;
     copy.querySelectorAll("*").forEach(function (element) {
-      Array.prototype.slice.call(element.attributes).forEach(function (attribute) {
-        var isEventHandler = attribute.name.slice(0, 2) === "on"; // onclick, onerror...
-        var servesScrollSync = attribute.name === "data-line" || attribute.name === "data-line-end";
+      attributeNames.call(element).forEach(function (name) {
+        var isEventHandler = name.slice(0, 2) === "on"; // onclick, onerror...
+        var servesScrollSync = name === "data-line" || name === "data-line-end";
         if (isEventHandler || servesScrollSync) {
-          element.removeAttribute(attribute.name);
+          removeAttribute.call(element, name);
         }
       });
     });
@@ -209,7 +222,7 @@
       return;
     }
     githubOnly = on;
-    document.body.classList.toggle("github-only", on); // base.css narrows it
+    katemark.byId("content").parentNode.classList.toggle("github-only", on); // the <body>, base.css narrows it
     rerender();
   };
 
@@ -219,14 +232,14 @@
 
   // The numbers at the foot of the pages of a PDF: off for a document of one page.
   window.__setPageNumbers = function (on) {
-    document.getElementById("page-numbers").disabled = !on;
+    katemark.byId("page-numbers").disabled = !on;
   };
 
   // True once nothing is still being drawn or loaded: an export waits for this.
   window.__settled = function () {
     return (
       !katemark.mermaidBusy() &&
-      Array.prototype.every.call(document.images, function (img) {
+      Array.prototype.every.call(katemark.byId("content").querySelectorAll("img"), function (img) {
         return img.complete;
       })
     );
@@ -238,53 +251,31 @@
   };
 
   window.__applyVars = function (vars) {
-    var root = document.documentElement.style;
+    var style = katemark.root.style;
     for (var k in vars) {
       if (Object.prototype.hasOwnProperty.call(vars, k)) {
-        root.setProperty(k, vars[k]);
+        style.setProperty(k, vars[k]);
       }
     }
   };
 
+  // The host names "github" or "github-dark".
   window.__useHljsTheme = function (name) {
-    var keep = null;
-    if (name === "github-dark") {
-      keep = "hljs-ghd";
-    } else if (name === "github") {
-      keep = "hljs-gh";
-    }
-    ["hljs-gh", "hljs-ghd"].forEach(function (id) {
-      var sheet = document.getElementById(id);
-      if (sheet) {
-        sheet.disabled = id !== keep;
-      }
-    });
-    var generated = document.getElementById("hljs-generated");
-    if (generated) {
-      generated.textContent = ""; // bundled theme active, clear generated
-    }
+    katemark.byId("hljs-gh").disabled = name !== "github";
+    katemark.byId("hljs-ghd").disabled = name !== "github-dark";
+    katemark.byId("hljs-generated").textContent = ""; // bundled theme active, clear generated
   };
 
   window.__setCodeCss = function (css) {
-    ["hljs-gh", "hljs-ghd"].forEach(function (id) {
-      var sheet = document.getElementById(id);
-      if (sheet) {
-        sheet.disabled = true; // generated theme takes over
-      }
-    });
-    var generated = document.getElementById("hljs-generated");
-    if (!generated) {
-      generated = document.createElement("style");
-      generated.id = "hljs-generated";
-      document.head.appendChild(generated);
-    }
-    generated.textContent = css;
+    katemark.byId("hljs-gh").disabled = true; // generated theme takes over
+    katemark.byId("hljs-ghd").disabled = true;
+    katemark.byId("hljs-generated").textContent = css;
   };
 
   window.__setColorScheme = function (dark) {
     var changed = dark !== katemark.isDark();
-    document.documentElement.setAttribute("data-pv-scheme", dark ? "dark" : "light");
-    document.documentElement.style.setProperty("color-scheme", dark ? "dark" : "light");
+    katemark.root.setAttribute("data-pv-scheme", dark ? "dark" : "light");
+    katemark.root.style.setProperty("color-scheme", dark ? "dark" : "light");
     // Diagrams bake their colors into the SVG, so a scheme change redraws them.
     if (changed && katemark.resetMermaid()) {
       rerender();

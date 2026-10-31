@@ -138,6 +138,13 @@ void EditingTest::formatsTable()
     // Outside a table there is nothing to format.
     m_view->setCursorPosition(KTextEditor::Cursor(0, 0));
     QVERIFY(!formatTableAtCursor(m_view));
+
+    // A table in a list keeps its indentation, a "\|" stays in its cell and a short row
+    // gets the cells it lacks.
+    m_doc->setText(QStringLiteral("- item\n\n  | a | b |\n  |---|---|\n  | x \\| y | z |\n  | short |"));
+    m_view->setCursorPosition(KTextEditor::Cursor(2, 4));
+    QVERIFY(formatTableAtCursor(m_view));
+    QCOMPARE(m_doc->text(), QStringLiteral("- item\n\n  | a      | b   |\n  | ------ | --- |\n  | x \\| y | z   |\n  | short  |     |"));
 }
 
 QTEST_MAIN(EditingTest)

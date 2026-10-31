@@ -183,45 +183,47 @@ QString applicationCodeCss(const Theme &theme)
     return css;
 }
 
-void PreviewWidget::applyTheme()
+// The colors of the look in use, GitHub's or the editor's, and whether they are dark.
+QJsonObject PreviewWidget::lookVars(bool &dark) const
 {
-    if (!m_loaded) {
-        return;
-    }
     if (Settings::self()->colorSource() == Settings::GitHub) {
-        applyGithubLook(githubLookIsDark());
-    } else {
-        const Theme theme = m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme();
-        bool dark = false;
-        const QJsonObject vars = applicationVars(theme, dark);
-        m_web->page()->setBackgroundColor(background(vars));
-        runJs(QStringLiteral("window.__setColorScheme(%1);").arg(dark ? QStringLiteral("true") : QStringLiteral("false")));
-        runJs(QStringLiteral("window.__applyVars(%1);").arg(compactJson(vars)));
-        runJs(QStringLiteral("window.__setCodeCss(%1);").arg(jsLiteral(applicationCodeCss(theme))));
+        dark = githubLookIsDark();
+        return githubVars(dark);
     }
+    return applicationVars(m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme(), dark);
 }
 
-void PreviewWidget::applyGithubLook(bool dark)
+void PreviewWidget::applyTheme()
 {
-    const QJsonObject vars = githubVars(dark);
+    // An export keeps GitHub's light look until it ends; endExport() calls this again.
+    if (!m_loaded || isExporting()) {
+        return;
+    }
+    bool dark = false;
+    applyLook(lookVars(dark), dark);
+}
+
+// Colors of the page and of its code: GitHub's code theme with GitHub's colors (always
+// during an export), one made from the editor's theme with the editor's colors.
+void PreviewWidget::applyLook(const QJsonObject &vars, bool dark)
+{
     m_web->page()->setBackgroundColor(background(vars));
     runJs(QStringLiteral("window.__setColorScheme(%1);").arg(dark ? QStringLiteral("true") : QStringLiteral("false")));
     runJs(QStringLiteral("window.__applyVars(%1);").arg(compactJson(vars)));
-    runJs(QStringLiteral("window.__useHljsTheme('%1');").arg(dark ? QStringLiteral("github-dark") : QStringLiteral("github")));
+    if (isExporting() || Settings::self()->colorSource() == Settings::GitHub) {
+        runJs(QStringLiteral("window.__useHljsTheme('%1');").arg(dark ? QStringLiteral("github-dark") : QStringLiteral("github")));
+    } else {
+        const Theme theme = m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme();
+        runJs(QStringLiteral("window.__setCodeCss(%1);").arg(jsLiteral(applicationCodeCss(theme))));
+    }
 }
 
 // The background of the look in use, known before the page is: its scripts set the colors
 // only once it has loaded.
 QColor PreviewWidget::pageBackground() const
 {
-    QJsonObject vars;
-    if (Settings::self()->colorSource() == Settings::GitHub) {
-        vars = githubVars(githubLookIsDark());
-    } else {
-        bool dark = false;
-        vars = applicationVars(m_view ? m_view->theme() : KTextEditor::Editor::instance()->theme(), dark);
-    }
-    return background(vars);
+    bool dark = false;
+    return background(lookVars(dark));
 }
 
 void PreviewWidget::changeEvent(QEvent *event)

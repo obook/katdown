@@ -66,5 +66,6 @@ jobs:
 
       # --no-tests=error because a bare ctest exits 0 when it finds nothing to run, so a change
       # that stopped BUILD_TESTING from registering the tests would leave this step green.
+      # ECM's own appstreamtest checks nothing here and would count as a test: left out.
       - name: test
-        run: ctest --test-dir build --output-on-failure --no-tests=error
+        run: ctest --test-dir build --output-on-failure --no-tests=error -E '^appstreamtest$'

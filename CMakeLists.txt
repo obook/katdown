@@ -35,33 +35,24 @@ find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
 
 add_definitions(-DTRANSLATION_DOMAIN="katemark")
 
-kcoreaddons_add_plugin(katemark
-    INSTALL_NAMESPACE "kf6/ktexteditor"
-    SOURCES
-        src/plugin.cpp
-        src/pluginview.cpp
-        src/pluginviewedit.cpp
-        src/previewwidget.cpp
-        src/previewtheme.cpp
-        src/previewload.cpp
-        src/previewexport.cpp
-        src/previewscroll.cpp
-        src/previewinput.cpp
-        src/imagepaste.cpp
-        src/markdownedit.cpp
-        src/markdowntable.cpp
-        src/configpage.cpp
-        src/settings.cpp
-        data/resources.qrc
+# The preview, the editing actions and the settings, compiled once for the plugin and the
+# test programs: a program cannot link against a plugin.
+add_library(katemarkcore OBJECT
+    src/previewwidget.cpp
+    src/previewtheme.cpp
+    src/previewload.cpp
+    src/previewexport.cpp
+    src/previewscroll.cpp
+    src/previewinput.cpp
+    src/imagepaste.cpp
+    src/markdownedit.cpp
+    src/markdowntable.cpp
+    src/settings.cpp
+    data/resources.qrc
 )
-
-target_include_directories(katemark PRIVATE src)
-
-target_compile_definitions(katemark PRIVATE
-    KATEMARK_VERSION="${PROJECT_VERSION}"
-)
-
-target_link_libraries(katemark PRIVATE
+set_target_properties(katemarkcore PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(katemarkcore PUBLIC src)
+target_link_libraries(katemarkcore PUBLIC
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -75,6 +66,21 @@ target_link_libraries(katemark PRIVATE
     KF6::XmlGui
     KF6::SyntaxHighlighting
 )
+
+kcoreaddons_add_plugin(katemark
+    INSTALL_NAMESPACE "kf6/ktexteditor"
+    SOURCES
+        src/plugin.cpp
+        src/pluginview.cpp
+        src/pluginviewedit.cpp
+        src/configpage.cpp
+)
+
+target_compile_definitions(katemark PRIVATE
+    KATEMARK_VERSION="${PROJECT_VERSION}"
+)
+
+target_link_libraries(katemark PRIVATE katemarkcore)
 
 if(BUILD_TESTING)
     add_subdirectory(tests)

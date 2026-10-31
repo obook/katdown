@@ -40,7 +40,9 @@ constexpr qreal ExportMarginMm = 15;
 // Replace every picture of the document folder by its content, so that the exported file
 // can be moved or sent on its own. A picture that cannot be read keeps its address, and so
 // does one stored elsewhere: the guard keeps it out of the page, and the export must not
-// carry a file the reader never saw.
+// carry a file the reader never saw. A file of the folder that is not a picture loses even
+// its address: <img src=".env"> shows nothing on screen, and neither its content nor its
+// path on this machine may leave with the export.
 QString embedLocalImages(const QString &html, const LocalFileGuard &guard)
 {
     static const QRegularExpression localPicture(QStringLiteral("(<img\\b[^>]*?\\bsrc=\")(file://[^\"]+)(\")"));
@@ -57,9 +59,10 @@ QString embedLocalImages(const QString &html, const LocalFileGuard &guard)
             continue;
         }
         const QString type = QMimeDatabase().mimeTypeForFile(path).name();
-        const QString content = QString::fromLatin1(file.readAll().toBase64());
         result += html.mid(copied, picture.capturedStart(2) - copied);
-        result += QStringLiteral("data:%1;base64,%2").arg(type, content);
+        if (type.startsWith(QLatin1String("image/"))) {
+            result += QStringLiteral("data:%1;base64,%2").arg(type, QString::fromLatin1(file.readAll().toBase64()));
+        }
         copied = picture.capturedEnd(2);
     }
     return result + html.mid(copied);
@@ -154,7 +157,7 @@ bool PreviewWidget::beginExport(const QString &path)
         cover->show();
         m_exportCover = cover;
     }
-    applyGithubLook(false);
+    applyLook(githubVars(false), false);
     return true;
 }
 

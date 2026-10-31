@@ -30,6 +30,7 @@
     <file>js/preview/mermaid.js</file>
     <file>js/preview/scroll.js</file>
     <file>js/preview/media.js</file>
+    <file>js/preview/zoom.js</file>
     <file>js/preview.js</file>
     <file>ui.rc</file>
   </qresource>

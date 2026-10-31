@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <QJsonObject>
 #include <QPointer>
 #include <QUrl>
 #include <QWidget>
@@ -104,7 +105,8 @@ private:
     void openLink(const QUrl &url);
 
     // previewtheme.cpp
-    void applyGithubLook(bool dark);
+    QJsonObject lookVars(bool &dark) const;
+    void applyLook(const QJsonObject &vars, bool dark);
     QColor pageBackground() const;
 
     // previewexport.cpp
@@ -154,5 +156,9 @@ private:
     QString m_text;
     bool m_paused = false;
     bool m_loaded = false;
+    // Reloads left after the render process died, for this document: one that kills it at
+    // every render must not reload at every key.
+    static constexpr int ReloadsAfterCrash = 3;
+    int m_reloadsLeft = ReloadsAfterCrash;
     bool m_pageAllowsRemoteMedia = false; // the setting the page was loaded with
 };

@@ -39,6 +39,14 @@
       return html + ">";
     }
 
+    // The id of a heading written in Markdown. Ids come from the rendered title (core.js):
+    // "_Big_ deal" gives "big-deal". A <template> keeps raw HTML in it inert.
+    function headingSlug(heading) {
+      var holder = katemark.createElement("template");
+      holder.innerHTML = md.renderInline(heading);
+      return slugify(katemark.shownText(holder.content));
+    }
+
     // <a> for a link to a note, to one of its headings, or to a heading of this page.
     function renderLink(target, label) {
       var file = target;
@@ -56,7 +64,7 @@
         href = encodeURI(hasExtension ? file : file + ".md");
       }
       if (heading) {
-        href += "#" + encodeURIComponent(slugify(heading));
+        href += "#" + encodeURIComponent(headingSlug(heading));
       }
 
       var text = label;

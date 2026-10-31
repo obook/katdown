@@ -30,13 +30,11 @@
       if (!/^https?:/i.test(picture.src)) {
         return;
       }
-      var settingName = document.createElement("em");
+      var settingName = katemark.createElement("em");
       settingName.textContent = blockedHint;
-      var note = document.createElement("span");
+      var note = katemark.createElement("span");
       note.className = "blocked-media";
-      note.appendChild(settingName);
-      note.appendChild(document.createElement("br"));
-      note.appendChild(document.createTextNode(picture.src));
+      note.append(settingName, katemark.createElement("br"), picture.src);
       picture.replaceWith(note);
     });
   }

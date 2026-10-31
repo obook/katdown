@@ -66,9 +66,10 @@ compile() {
 }
 
 # A package is only made from a build whose tests pass. A bare ctest succeeds when it
-# finds no test to run, hence --no-tests=error.
+# finds no test to run, hence --no-tests=error. ECM adds an appstreamtest of its own,
+# which checks nothing here (no AppStream file): left out, it cannot pass for the tests.
 run_tests() {
-    if ! ctest --test-dir "${build_dir}" --output-on-failure --no-tests=error; then
+    if ! ctest --test-dir "${build_dir}" --output-on-failure --no-tests=error -E '^appstreamtest$'; then
         fail "the tests failed; no package was made."
     fi
 }

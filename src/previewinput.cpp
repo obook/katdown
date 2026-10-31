@@ -22,6 +22,7 @@
 #include <QWebEngineView>
 
 #include <KActionCollection>
+#include <KLocalizedString>
 #include <KTextEditor/MainWindow>
 #include <KXMLGUIClient>
 #include <KXMLGUIFactory>
@@ -97,7 +98,8 @@ bool PreviewWidget::forwardKeyEvent(QKeyEvent *event)
             break;
         }
     }
-    if (mods == Qt::ControlModifier && (key == Qt::Key_C || key == Qt::Key_A || key == Qt::Key_Insert)) {
+    // Ctrl+0 puts the preview back to 100% (zoom.js); Kate would reset the editor font.
+    if (mods == Qt::ControlModifier && (key == Qt::Key_C || key == Qt::Key_A || key == Qt::Key_Insert || key == Qt::Key_0)) {
         return false;
     }
 
@@ -203,6 +205,12 @@ void PreviewWidget::showContextMenu(const QPoint &position)
     QAction *selectAll = menu.addAction(QIcon::fromTheme(QStringLiteral("edit-select-all")), QCoreApplication::translate("QWidgetTextControl", "Select All"));
     connect(selectAll, &QAction::triggered, this, [this]() {
         m_web->triggerPageAction(QWebEnginePage::SelectAll);
+    });
+    // The shortcut is only shown here: the page handles Ctrl+0 itself (zoom.js).
+    QAction *resetZoom = menu.addAction(QIcon::fromTheme(QStringLiteral("zoom-original")), i18nc("@action:inmenu put the preview back to 100 % zoom", "Reset Zoom"));
+    resetZoom->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_0));
+    connect(resetZoom, &QAction::triggered, this, [this]() {
+        runJs(QStringLiteral("window.__resetZoom();"));
     });
     if (!actions().isEmpty()) {
         menu.addSeparator();

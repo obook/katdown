@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-22 20:11+0200\n"
+"POT-Creation-Date: 2026-10-31 11:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -234,6 +234,12 @@ msgstr ""
 #: src/pluginviewedit.cpp:149
 #, kde-format
 msgid "Format Table"
+msgstr ""
+
+#: src/previewinput.cpp:210
+#, kde-format
+msgctxt "@action:inmenu put the preview back to 100 % zoom"
+msgid "Reset Zoom"
 msgstr ""
 
 #: src/previewwidget.cpp:50

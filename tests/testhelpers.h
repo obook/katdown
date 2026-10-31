@@ -20,6 +20,7 @@
 
 #include <KTextEditor/Document>
 #include <KLocalizedString>
+#include <KSharedConfig>
 #include <KTextEditor/Editor>
 
 // How long the tests wait, in milliseconds.
@@ -66,16 +67,20 @@ inline QString evalJs(PreviewWidget *preview, const QString &code)
     return answer->value;
 }
 
-// Number of elements of the page that match a CSS selector.
+// Number of elements of the page that match a CSS selector, -1 when the page did not
+// answer: a broken selector must not pass for "no element".
 inline int countElements(PreviewWidget *preview, const char *selector)
 {
-    return evalJs(preview, QStringLiteral("document.querySelectorAll('%1').length").arg(QLatin1String(selector))).toInt();
+    bool ok = false;
+    const int count = evalJs(preview, QStringLiteral("document.querySelectorAll('%1').length").arg(QLatin1String(selector))).toInt(&ok);
+    return ok ? count : -1;
 }
 
 // Read the rendered article back out of the page.
 inline QString pageText(PreviewWidget *preview)
 {
-    return evalJs(preview, QStringLiteral("document.getElementById('content').innerText"));
+    // Through the prototype: a document holding <img name="getElementById"> hides the method.
+    return evalJs(preview, QStringLiteral("Document.prototype.getElementById.call(document, 'content').innerText"));
 }
 
 // naturalWidth stays 0 for an image the page never fetched, which is what separates a
@@ -112,6 +117,9 @@ protected:
     // To call from initTestCase().
     void createFixture()
     {
+        // A run killed after a setting changed (GitHub only checked) leaves it on disk, and
+        // every later run fails: start from the defaults. Settings reads them afterwards.
+        KSharedConfig::openConfig()->deleteGroup(QStringLiteral("Katemark"));
         // The tests compare titles written in English, whatever the session's language.
         KLocalizedString::setLanguages({QStringLiteral("en")});
         QVERIFY(m_dir.isValid());

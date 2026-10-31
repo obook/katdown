@@ -4,6 +4,7 @@
 // Date: October 2026
 // License: GPL-3.0-or-later
 
+#include "previewpage.h"
 #include "settings.h"
 #include "testhelpers.h"
 
@@ -33,6 +34,7 @@ private Q_SLOTS:
     void endsAnExportWhenThePageReloads();
     void numbersThePagesOfAPdf();
     void leavesASinglePageUnnumbered();
+    void refusesFilesOnOtherMachines();
 
 private:
     void readPdf(const QString &path, QString *text, QStringList *pageNumbers, QString *total);
@@ -71,19 +73,30 @@ void ExportTest::readPdf(const QString &path, QString *text, QStringList *pageNu
 // attributes.
 void ExportTest::exportsPdfAndHtml()
 {
-    // A picture stored outside the document's folder: the preview does not load it.
-    QTemporaryDir elsewhere;
+    // A picture stored outside the document's folder: the preview does not load it. Its
+    // folder starts with the name of the document's, "/tmp/x-1" beside "/tmp/x".
+    QTemporaryDir elsewhere(m_dir.path() + QStringLiteral("-XXXXXX"));
     QVERIFY(elsewhere.isValid());
     QFile outside(elsewhere.filePath(QStringLiteral("outside.png")));
     QVERIFY(outside.open(QIODevice::WriteOnly));
     QCOMPARE(outside.write(RedPng), RedPng.size());
     outside.close();
+    // In the folder: a picture whose name needs escaping, and a file that is not a picture.
+    QFile oddName(m_dir.filePath(QStringLiteral("a&b c.png")));
+    QVERIFY(oddName.open(QIODevice::WriteOnly));
+    QCOMPARE(oddName.write(RedPng), RedPng.size());
+    oddName.close();
+    QFile secret(m_dir.filePath(QStringLiteral(".env")));
+    QVERIFY(secret.open(QIODevice::WriteOnly));
+    QVERIFY(secret.write("TOKEN=do-not-export\n") > 0);
+    secret.close();
 
     KTextEditor::Document *doc = openDocument();
     QTRY_VERIFY(doc->text().contains(SampleBodyLine));
     auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
     QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
-    doc->setText(QStringLiteral(":::info\nthe boxed line\n:::\n\nand $a^2$\n\n![red](%1)\n\n<img src=\"%2\">\n\n<script>var leaked = 1;</script>\n\n"
+    doc->setText(QStringLiteral(":::info\nthe boxed line\n:::\n\nand $a^2$\n\n![red](%1)\n\n<img src=\"%2\">\n\n![odd](<a&b c.png>)\n\n<img src=\".env\" width=\"0\">\n\n"
+                                "<script>var leaked = 1;</script>\n\n"
                                 "<meta http-equiv=\"refresh\" content=\"999;url=https://example.org/\">\n\n<p onclick=\"leak()\">tail</p>\n")
                      .arg(ImageName, QUrl::fromLocalFile(outside.fileName()).toString()));
     QCOMPARE(waitForImageWidth(preview.get()), ImageWidth);
@@ -113,13 +126,29 @@ void ExportTest::exportsPdfAndHtml()
     QVERIFY(!page.contains(QLatin1String("onclick")));
     QVERIFY(!page.contains(QLatin1String("http-equiv=\"refresh\"")));
     QVERIFY(page.contains(QLatin1String("Content-Security-Policy")));
-    // The picture of the folder travels inside the file: it still shows when the file is
-    // moved. The one from elsewhere keeps its address and stays where it is.
-    QCOMPARE(page.count(QLatin1String("src=\"data:image/png;base64,")), 1);
+    // The pictures of the folder travel inside the file: they still show when the file is
+    // moved. The one from elsewhere keeps its address and stays where it is. The file that
+    // is not a picture leaves neither its content nor its address.
+    QCOMPARE(page.count(QLatin1String("src=\"data:image/png;base64,")), 2);
     QVERIFY(page.contains(QLatin1String("outside.png")));
+    QVERIFY(!page.contains(QString::fromLatin1(QByteArrayLiteral("TOKEN=do-not-export\n").toBase64())));
+    QVERIFY(!page.contains(QLatin1String(".env")));
     QVERIFY(!page.contains(QLatin1String("data-line")));
 
     delete doc;
+}
+
+// "//host/share/a.png" is on another machine under Windows: the guard refuses it without
+// looking it up, which would reach that host.
+void ExportTest::refusesFilesOnOtherMachines()
+{
+    LocalFileGuard guard;
+    guard.setRoot(m_dir.path());
+    QVERIFY(guard.allows(m_dir.filePath(ImageName)));
+    // On Linux "//tmp/.../red.png" is the picture of the folder itself: only the rule on
+    // network paths turns it down.
+    QVERIFY(!guard.allows(QLatin1Char('/') + m_dir.filePath(ImageName)));
+    QVERIFY(!guard.allows(QStringLiteral("//evil.example@SSL@443/share/a.png")));
 }
 
 // An export redraws the page in GitHub's light look. The reader must not see it: on a

@@ -128,6 +128,10 @@ function Get-RelativePath([string]$Root, [string]$FullPath) {
     return $FullPath.Substring($rootFull.Length + 1)
 }
 
+# A file that was Kate's before -Force overwrote it is listed as "kate:<path>": an update
+# keeps it without asking again, and -Uninstall leaves it, or Kate would break.
+$KatePrefix = 'kate:'
+
 function Read-Manifest([string]$Dir) {
     $path = Join-Path $Dir $ManifestRel
     if (-not (Test-Path $path)) {
@@ -140,6 +144,7 @@ function Invoke-Install([string]$Dir) {
     $qtVersion = Assert-QtVersion $Dir
     $payload = Get-PayloadFiles
     $previous = Read-Manifest $Dir
+    $known = @($previous | ForEach-Object { if ($_.StartsWith($KatePrefix)) { $_.Substring($KatePrefix.Length) } else { $_ } })
 
     # Never overwrite a file that is not ours: a later Kate could start shipping WebEngine itself,
     # and replacing its copy with ours would break Kate.
@@ -147,7 +152,7 @@ function Invoke-Install([string]$Dir) {
     foreach ($file in $payload) {
         $rel = Get-RelativePath $PayloadDir $file.FullName
         $dest = Join-Path $Dir $rel
-        if ((Test-Path $dest) -and ($previous -notcontains $rel)) {
+        if ((Test-Path $dest) -and ($known -notcontains $rel)) {
             $collisions += $rel
         }
     }
@@ -163,7 +168,12 @@ $(if ($collisions.Count -gt 10) { "  ... and $($collisions.Count - 10) more`n" }
     Write-Host "Installing Katemark into $Dir (Kate's Qt $qtVersion)"
     $written = New-Object System.Collections.Generic.List[string]
     foreach ($file in $payload) {
-        $written.Add((Get-RelativePath $PayloadDir $file.FullName))
+        $rel = Get-RelativePath $PayloadDir $file.FullName
+        if (($collisions -contains $rel) -or ($previous -contains "$KatePrefix$rel")) {
+            $written.Add("$KatePrefix$rel")
+        } else {
+            $written.Add($rel)
+        }
     }
 
     # Write the manifest before copying: if a copy fails partway (disk full, a locked DLL),
@@ -190,7 +200,7 @@ $(if ($collisions.Count -gt 10) { "  ... and $($collisions.Count - 10) more`n" }
     }
 
     # Remove what an older payload shipped and this one does not: an uninstall would miss it.
-    $orphans = @($previous | Where-Object { $written -notcontains $_ })
+    $orphans = @($previous | Where-Object { ($written -notcontains $_) -and -not $_.StartsWith($KatePrefix) })
     foreach ($rel in $orphans) {
         $path = Join-Path $Dir $rel
         if ((Test-Path $path) -and $PSCmdlet.ShouldProcess($path, 'Remove (left over from a previous Katemark)')) {
@@ -215,6 +225,9 @@ function Invoke-Uninstall([string]$Dir) {
     $removed = 0
     $dirs = New-Object System.Collections.Generic.HashSet[string]
     foreach ($rel in $entries) {
+        if ($rel.StartsWith($KatePrefix)) {
+            continue
+        }
         $path = Join-Path $Dir $rel
         if (Test-Path $path) {
             if ($PSCmdlet.ShouldProcess($path, 'Remove')) {

@@ -36,12 +36,24 @@ inline QString compactJson(const QJsonObject &obj)
     return QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact));
 }
 
+// "//host/share/x" or "\\host\share\x": a file on another machine under Windows. Looking
+// it up contacts that machine and hands it the user's credentials. Read from the path,
+// not from QUrl::host(): "//host@SSL@443/x" has no host for QUrl, yet Windows goes there.
+inline bool isNetworkPath(const QString &path)
+{
+    return path.startsWith(QLatin1String("//")) || path.startsWith(QLatin1String("\\\\"));
+}
+
 // The file a clicked link means. The page resolves every link against the folder of the
 // document (base), so "~/notes" arrives as "<folder>/~/notes", and a wiki link written
 // without its extension names a file that is not there.
 inline QUrl localLinkTarget(const QUrl &url, const QUrl &base)
 {
     QString path = url.toLocalFile();
+    // Left as written: looking it up while the pointer passes over it would reach the host.
+    if (isNetworkPath(path)) {
+        return url;
+    }
     if (QFileInfo::exists(path)) {
         return url;
     }
