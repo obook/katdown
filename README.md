@@ -145,7 +145,7 @@ The documents in [`examples/`](examples) show what the preview renders:
 | Show or hide the preview | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, the **Preview** button of the main toolbar or Tools > Preview |
 | See the document as GitHub will show it | Check **GitHub only** above the preview |
 | Export what the preview shows | The **PDF** and **HTML** buttons above the preview, or Tools > Export Preview as PDF and Tools > Export Preview as HTML |
-| Follow a link | Click it: a local file opens in Kate, a web address in your browser, a link to a heading scrolls the preview. Point at it to see where it goes |
+| Follow a link | Click it: a local file opens in Kate, a web address in your browser, a link to a heading scrolls the preview. Any other link, such as `zotero:` or `obsidian:`, asks before it starts another program. Point at a link to see where it goes |
 | Zoom the preview, diagrams included | <kbd>Ctrl</kbd> + mouse wheel over it; <kbd>Ctrl</kbd>+<kbd>0</kbd> or **Reset Zoom** in its context menu puts it back to 100% |
 | Paste a picture | Copy an image, then paste in the editor |
 

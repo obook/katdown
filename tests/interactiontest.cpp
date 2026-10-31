@@ -6,20 +6,44 @@
 // License: GPL-3.0-or-later
 
 #include "imagepaste.h"
+#include "previewpage.h"
 #include "previewutil.h"
 #include "settings.h"
 #include "testhelpers.h"
 
+#include <QApplication>
+#include <QCheckBox>
 #include <QClipboard>
+#include <QDesktopServices>
+#include <QDialog>
 #include <QDir>
 #include <QFile>
 #include <QImage>
+#include <QLabel>
+#include <QPushButton>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QTimer>
 #include <QToolTip>
 #include <QWheelEvent>
 
+#include <KMessageBox>
+#include <KStandardGuiItem>
 #include <KTextEditor/View>
+
+// Stands for the programs of the system: QDesktopServices hands it the links it would
+// have given them.
+class UrlCatcher : public QObject
+{
+    Q_OBJECT
+public:
+    QList<QUrl> urls;
+public Q_SLOTS:
+    void open(const QUrl &url)
+    {
+        urls.append(url);
+    }
+};
 
 class InteractionTest : public PreviewTest
 {
@@ -34,6 +58,7 @@ private Q_SLOTS:
     void loadsRemoteImageOnlyWhenAllowed();
     void findsWhereALocalLinkPoints();
     void showsWhereAHoveredLinkGoes();
+    void asksBeforeStartingAnotherProgram();
 };
 
 // Scroll sync runs both ways between a real editor view and the page: the block at the top
@@ -219,6 +244,85 @@ void InteractionTest::showsWhereAHoveredLinkGoes()
     Q_EMIT preview->findChild<QWebEngineView *>()->page()->linkHovered(QStringLiteral("https://kde.org/"));
     QCOMPARE(QToolTip::text(), QStringLiteral("https://kde.org/"));
     QToolTip::hideText();
+    preview.reset();
+    delete doc;
+}
+
+// A web link opens at once. A "zotero:" link asks first, and "Do not ask again" holds for
+// zotero only. The question waits in a dialog of its own, so a timer reads and answers it.
+void InteractionTest::asksBeforeStartingAnotherProgram()
+{
+    UrlCatcher catcher;
+    QDesktopServices::setUrlHandler(QStringLiteral("https"), &catcher, "open");
+    QDesktopServices::setUrlHandler(QStringLiteral("zotero"), &catcher, "open");
+    QDesktopServices::setUrlHandler(QStringLiteral("smb"), &catcher, "open");
+    const QString dontAskZotero = QStringLiteral("OpenLinks_zotero");
+    KMessageBox::enableMessage(dontAskZotero); // left over by a killed run
+
+    KTextEditor::Document *doc = openDocument();
+    QTRY_VERIFY(doc->text().contains(SampleBodyLine));
+    auto preview = std::make_unique<PreviewWidget>(nullptr, nullptr, doc);
+    QVERIFY(waitForPageText(preview.get(), SampleBodyLine));
+    auto *page = static_cast<PreviewPage *>(preview->findChild<QWebEngineView *>()->page());
+
+    QStringList questions;
+    bool open = false;
+    bool dontAskAgain = false;
+    QTimer answerer;
+    answerer.setInterval(20);
+    connect(&answerer, &QTimer::timeout, &answerer, [&questions, &open, &dontAskAgain]() {
+        auto *dialog = qobject_cast<QDialog *>(QApplication::activeModalWidget());
+        if (!dialog || !dialog->isVisible()) {
+            return;
+        }
+        QString question;
+        for (const QLabel *label : dialog->findChildren<QLabel *>()) {
+            question += label->text();
+        }
+        questions.append(question);
+        if (auto *box = dialog->findChild<QCheckBox *>()) {
+            box->setChecked(dontAskAgain);
+        }
+        const QString button = open ? KStandardGuiItem::open().text() : KStandardGuiItem::cancel().text();
+        for (QPushButton *candidate : dialog->findChildren<QPushButton *>()) {
+            if (candidate->text() == button) {
+                candidate->click();
+                return;
+            }
+        }
+    });
+    answerer.start();
+
+    const QUrl web(QStringLiteral("https://kde.org/"));
+    page->onLinkActivated(web);
+    QCOMPARE(questions.size(), 0);
+    QCOMPARE(catcher.urls, QList<QUrl>{web});
+
+    const QUrl item(QStringLiteral("zotero://select/items/ABCD1234"));
+    page->onLinkActivated(item);
+    QCOMPARE(questions.size(), 1);
+    QVERIFY2(questions[0].contains(QLatin1String("\"zotero:\"")) && questions[0].contains(item.toString()), qPrintable(questions[0]));
+    QCOMPARE(catcher.urls.size(), 1); // cancelled
+
+    open = true;
+    dontAskAgain = true;
+    page->onLinkActivated(item);
+    QCOMPARE(questions.size(), 2);
+    QCOMPARE(catcher.urls.last(), item);
+    page->onLinkActivated(item);
+    QCOMPARE(questions.size(), 2); // not asked again
+    QCOMPARE(catcher.urls.size(), 3);
+
+    open = false;
+    page->onLinkActivated(QUrl(QStringLiteral("smb://server/share")));
+    QCOMPARE(questions.size(), 3);
+    QCOMPARE(catcher.urls.size(), 3);
+
+    answerer.stop();
+    KMessageBox::enableMessage(dontAskZotero);
+    for (const char *scheme : {"https", "zotero", "smb"}) {
+        QDesktopServices::unsetUrlHandler(QLatin1String(scheme));
+    }
     preview.reset();
     delete doc;
 }

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: katemark\n"
 "Report-Msgid-Bugs-To: https://github.com/obook/katemark/issues\n"
-"POT-Creation-Date: 2026-10-31 11:22+0100\n"
+"POT-Creation-Date: 2026-10-31 14:22+0100\n"
 "PO-Revision-Date: 2026-10-03 12:00+0200\n"
 "Last-Translator: Katemark contributors\n"
 "Language-Team: Spanish\n"
@@ -61,7 +61,7 @@ msgstr ""
 "activo del editor, de modo que la vista previa se integra con el resto de "
 "Kate."
 
-#: src/configpage.cpp:97 src/previewwidget.cpp:195
+#: src/configpage.cpp:97 src/previewwidget.cpp:203
 #, kde-format
 msgid "Load media previews from remote URLs"
 msgstr "Cargar vistas previas multimedia desde URL remotas"
@@ -215,37 +215,37 @@ msgstr "Vista previa exportada a %1"
 msgid "Could not export the preview to %1"
 msgstr "No se ha podido exportar la vista previa a %1"
 
-#: src/pluginviewedit.cpp:107
+#: src/pluginviewedit.cpp:111
 #, kde-format
 msgid "Bold"
 msgstr "Negrita"
 
-#: src/pluginviewedit.cpp:114
+#: src/pluginviewedit.cpp:118
 #, kde-format
 msgid "Italic"
 msgstr "Cursiva"
 
-#: src/pluginviewedit.cpp:121
+#: src/pluginviewedit.cpp:125
 #, kde-format
 msgid "Strikethrough"
 msgstr "Tachado"
 
-#: src/pluginviewedit.cpp:128
+#: src/pluginviewedit.cpp:132
 #, kde-format
 msgid "Increase Heading Level"
 msgstr "Aumentar el nivel de encabezado"
 
-#: src/pluginviewedit.cpp:135
+#: src/pluginviewedit.cpp:139
 #, kde-format
 msgid "Decrease Heading Level"
 msgstr "Disminuir el nivel de encabezado"
 
-#: src/pluginviewedit.cpp:142
+#: src/pluginviewedit.cpp:146
 #, kde-format
 msgid "Paste as Link"
 msgstr "Pegar como enlace"
 
-#: src/pluginviewedit.cpp:149
+#: src/pluginviewedit.cpp:153
 #, kde-format
 msgid "Format Table"
 msgstr "Formatear la tabla"
@@ -256,192 +256,192 @@ msgctxt "@action:inmenu put the preview back to 100 % zoom"
 msgid "Reset Zoom"
 msgstr "Restablecer el zoom"
 
-#: src/previewwidget.cpp:50
+#: src/previewwidget.cpp:52
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Note"
 msgstr "Nota"
 
-#: src/previewwidget.cpp:51
+#: src/previewwidget.cpp:53
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Tip"
 msgstr "Consejo"
 
-#: src/previewwidget.cpp:52
+#: src/previewwidget.cpp:54
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Important"
 msgstr "Importante"
 
-#: src/previewwidget.cpp:53
+#: src/previewwidget.cpp:55
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Warning"
 msgstr "Advertencia"
 
-#: src/previewwidget.cpp:54
+#: src/previewwidget.cpp:56
 #, kde-format
 msgctxt "@title GitHub alert"
 msgid "Caution"
 msgstr "Precaución"
 
-#: src/previewwidget.cpp:55
+#: src/previewwidget.cpp:57
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Abstract"
 msgstr "Resumen"
 
-#: src/previewwidget.cpp:56
+#: src/previewwidget.cpp:58
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Info"
 msgstr "Información"
 
-#: src/previewwidget.cpp:57
+#: src/previewwidget.cpp:59
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Todo"
 msgstr "Pendiente"
 
-#: src/previewwidget.cpp:58
+#: src/previewwidget.cpp:60
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Success"
 msgstr "Éxito"
 
-#: src/previewwidget.cpp:59
+#: src/previewwidget.cpp:61
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Question"
 msgstr "Pregunta"
 
-#: src/previewwidget.cpp:60
+#: src/previewwidget.cpp:62
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Failure"
 msgstr "Fallo"
 
-#: src/previewwidget.cpp:61
+#: src/previewwidget.cpp:63
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Danger"
 msgstr "Peligro"
 
-#: src/previewwidget.cpp:62
+#: src/previewwidget.cpp:64
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Bug"
 msgstr "Error"
 
-#: src/previewwidget.cpp:63
+#: src/previewwidget.cpp:65
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Example"
 msgstr "Ejemplo"
 
-#: src/previewwidget.cpp:64
+#: src/previewwidget.cpp:66
 #, kde-format
 msgctxt "@title Obsidian callout"
 msgid "Quote"
 msgstr "Cita"
 
-#: src/previewwidget.cpp:65
+#: src/previewwidget.cpp:67
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Definition"
 msgstr ""
 
-#: src/previewwidget.cpp:66
+#: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Theorem"
 msgstr ""
 
-#: src/previewwidget.cpp:67
+#: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Lemma"
 msgstr ""
 
-#: src/previewwidget.cpp:68
+#: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proposition"
 msgstr ""
 
-#: src/previewwidget.cpp:69
+#: src/previewwidget.cpp:71
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Corollary"
 msgstr ""
 
-#: src/previewwidget.cpp:70
+#: src/previewwidget.cpp:72
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Axiom"
 msgstr ""
 
-#: src/previewwidget.cpp:71
+#: src/previewwidget.cpp:73
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Claim"
 msgstr ""
 
-#: src/previewwidget.cpp:72
+#: src/previewwidget.cpp:74
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Assumption"
 msgstr ""
 
-#: src/previewwidget.cpp:73
+#: src/previewwidget.cpp:75
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Conjecture"
 msgstr ""
 
-#: src/previewwidget.cpp:74
+#: src/previewwidget.cpp:76
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Hypothesis"
 msgstr ""
 
-#: src/previewwidget.cpp:75
+#: src/previewwidget.cpp:77
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proof"
 msgstr ""
 
-#: src/previewwidget.cpp:76
+#: src/previewwidget.cpp:78
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Exercise"
 msgstr ""
 
-#: src/previewwidget.cpp:77
+#: src/previewwidget.cpp:79
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Method"
 msgstr ""
 
-#: src/previewwidget.cpp:78
+#: src/previewwidget.cpp:80
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
 msgstr "Katemark"
 
-#: src/previewwidget.cpp:79
+#: src/previewwidget.cpp:81
 #, fuzzy, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
 msgstr "Precaución"
 
-#: src/previewwidget.cpp:119
+#: src/previewwidget.cpp:121
 #, kde-format
 msgid "GitHub only"
 msgstr "Solo GitHub"
 
-#: src/previewwidget.cpp:120
+#: src/previewwidget.cpp:122
 #, kde-format
 msgid ""
 "Render only what GitHub renders, without the CodiMD, Obsidian and MkDocs "
@@ -450,10 +450,16 @@ msgstr ""
 "Mostrar solo lo que muestra GitHub, sin la sintaxis de CodiMD, Obsidian y "
 "MkDocs"
 
-#: src/previewwidget.cpp:133
+#: src/previewwidget.cpp:135
 #, kde-format
 msgctxt ""
 "@info:status the preview is rendering a long document; one to three dots "
 "follow"
 msgid "Rendering"
 msgstr "Renderizando"
+
+#: src/previewwidget.cpp:279
+#, kde-format
+msgctxt "@info %1 is the start of a link, such as zotero or smb"
+msgid "Open this link with the application set for \"%1:\" links?"
+msgstr "¿Abrir este enlace con la aplicación asignada a los enlaces \"%1:\"?"

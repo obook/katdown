@@ -26,6 +26,8 @@
 #include <QWebEngineView>
 
 #include <KLocalizedString>
+#include <KMessageBox>
+#include <KStandardGuiItem>
 #include <KTextEditor/Document>
 #include <KTextEditor/MainWindow>
 #include <KTextEditor/View>
@@ -152,9 +154,15 @@ void PreviewWidget::createWebView()
         openLink(url);
     };
     // A link that asks for a window of its own (target="_blank", a middle click) opens
-    // like any other.
+    // like any other, later as a click does: the question some links ask must not wait
+    // inside Qt WebEngine's call.
     connect(page, &QWebEnginePage::newWindowRequested, this, [this](QWebEngineNewWindowRequest &request) {
-        openLink(request.requestedUrl());
+        QMetaObject::invokeMethod(
+            this,
+            [this, url = request.requestedUrl()]() {
+                openLink(url);
+            },
+            Qt::QueuedConnection);
     });
     // Where a link goes, shown while the pointer is on it. Leaving the link sends an
     // empty address, which hides the tip.
@@ -251,17 +259,37 @@ PreviewWidget::~PreviewWidget()
     m_guard = nullptr;
 }
 
-// The addresses a pasted link may have (markdownedit.cpp), files aside: a link in a
-// document must not start whatever program the system has for "smb:", "steam:" or
-// "search-ms:", which a browser would first ask about.
+// The addresses a pasted link may have (markdownedit.cpp) open at once. Any other kind,
+// "zotero:" as well as "smb:" or "search-ms:", starts a program of the system: the reader
+// is asked first, as a browser does, and "Do not ask again" is kept for each kind.
 void PreviewWidget::openLink(const QUrl &url)
 {
     static const QStringList openable{QStringLiteral("http"), QStringLiteral("https"), QStringLiteral("ftp"), QStringLiteral("mailto")};
-    if (url.isLocalFile() && m_mainWindow) {
-        m_mainWindow->openUrl(localLinkTarget(url, baseUrl()));
-    } else if (openable.contains(url.scheme())) {
-        QDesktopServices::openUrl(url);
+    if (url.isLocalFile()) {
+        if (m_mainWindow) {
+            m_mainWindow->openUrl(localLinkTarget(url, baseUrl()));
+        }
+        return;
     }
+    if (url.scheme().isEmpty()) {
+        return;
+    }
+    if (!openable.contains(url.scheme())) {
+        const QString question =
+            i18nc("@info %1 is the start of a link, such as zotero or smb", "Open this link with the application set for \"%1:\" links?", url.scheme());
+        // The address goes after the question: a label reads its text as plain when the
+        // first line holds no tag, so an address cannot pass for formatting.
+        const int answer = KMessageBox::warningContinueCancel(this,
+                                                              question + QStringLiteral("\n\n") + url.toDisplayString(),
+                                                              QString(),
+                                                              KStandardGuiItem::open(),
+                                                              KStandardGuiItem::cancel(),
+                                                              QStringLiteral("OpenLinks_") + url.scheme());
+        if (answer != KMessageBox::Continue) {
+            return;
+        }
+    }
+    QDesktopServices::openUrl(url);
 }
 
 // The page runs its scripts one after the other, so an answer to the last one sent means
