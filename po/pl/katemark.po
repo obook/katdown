@@ -346,91 +346,91 @@ msgstr "Cytat"
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Definition"
-msgstr ""
+msgstr "Definicja"
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Theorem"
-msgstr ""
+msgstr "Twierdzenie"
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Lemma"
-msgstr ""
+msgstr "Lemat"
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proposition"
-msgstr ""
+msgstr "Stwierdzenie"
 
 #: src/previewwidget.cpp:71
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Corollary"
-msgstr ""
+msgstr "Wniosek"
 
 #: src/previewwidget.cpp:72
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Axiom"
-msgstr ""
+msgstr "Aksjomat"
 
 #: src/previewwidget.cpp:73
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Claim"
-msgstr ""
+msgstr "Teza"
 
 #: src/previewwidget.cpp:74
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Assumption"
-msgstr ""
+msgstr "Założenie"
 
 #: src/previewwidget.cpp:75
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Conjecture"
-msgstr ""
+msgstr "Przypuszczenie"
 
 #: src/previewwidget.cpp:76
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Hypothesis"
-msgstr ""
+msgstr "Hipoteza"
 
 #: src/previewwidget.cpp:77
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proof"
-msgstr ""
+msgstr "Dowód"
 
 #: src/previewwidget.cpp:78
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Exercise"
-msgstr ""
+msgstr "Ćwiczenie"
 
 #: src/previewwidget.cpp:79
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Method"
-msgstr ""
+msgstr "Metoda"
 
 #: src/previewwidget.cpp:80
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
-msgstr "Katemark"
+msgstr "Uwaga"
 
 #: src/previewwidget.cpp:81
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
-msgstr "Uwaga"
+msgstr "Rozwiązanie"
 
 #: src/previewwidget.cpp:121
 #, kde-format

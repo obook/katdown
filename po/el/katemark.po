@@ -349,91 +349,91 @@ msgstr "Παράθεση"
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Definition"
-msgstr ""
+msgstr "Ορισμός"
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Theorem"
-msgstr ""
+msgstr "Θεώρημα"
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Lemma"
-msgstr ""
+msgstr "Λήμμα"
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proposition"
-msgstr ""
+msgstr "Πρόταση"
 
 #: src/previewwidget.cpp:71
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Corollary"
-msgstr ""
+msgstr "Πόρισμα"
 
 #: src/previewwidget.cpp:72
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Axiom"
-msgstr ""
+msgstr "Αξίωμα"
 
 #: src/previewwidget.cpp:73
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Claim"
-msgstr ""
+msgstr "Ισχυρισμός"
 
 #: src/previewwidget.cpp:74
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Assumption"
-msgstr ""
+msgstr "Παραδοχή"
 
 #: src/previewwidget.cpp:75
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Conjecture"
-msgstr ""
+msgstr "Εικασία"
 
 #: src/previewwidget.cpp:76
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Hypothesis"
-msgstr ""
+msgstr "Υπόθεση"
 
 #: src/previewwidget.cpp:77
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proof"
-msgstr ""
+msgstr "Απόδειξη"
 
 #: src/previewwidget.cpp:78
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Exercise"
-msgstr ""
+msgstr "Άσκηση"
 
 #: src/previewwidget.cpp:79
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Method"
-msgstr ""
+msgstr "Μέθοδος"
 
 #: src/previewwidget.cpp:80
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
-msgstr "Katemark"
+msgstr "Παρατήρηση"
 
 #: src/previewwidget.cpp:81
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
-msgstr "Προσοχή"
+msgstr "Λύση"
 
 #: src/previewwidget.cpp:121
 #, kde-format

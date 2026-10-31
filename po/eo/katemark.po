@@ -345,91 +345,91 @@ msgstr "Citaĵo"
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Definition"
-msgstr ""
+msgstr "Difino"
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Theorem"
-msgstr ""
+msgstr "Teoremo"
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Lemma"
-msgstr ""
+msgstr "Lemo"
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proposition"
-msgstr ""
+msgstr "Propozicio"
 
 #: src/previewwidget.cpp:71
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Corollary"
-msgstr ""
+msgstr "Korolario"
 
 #: src/previewwidget.cpp:72
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Axiom"
-msgstr ""
+msgstr "Aksiomo"
 
 #: src/previewwidget.cpp:73
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Claim"
-msgstr ""
+msgstr "Aserto"
 
 #: src/previewwidget.cpp:74
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Assumption"
-msgstr ""
+msgstr "Supozo"
 
 #: src/previewwidget.cpp:75
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Conjecture"
-msgstr ""
+msgstr "Konjekto"
 
 #: src/previewwidget.cpp:76
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Hypothesis"
-msgstr ""
+msgstr "Hipotezo"
 
 #: src/previewwidget.cpp:77
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proof"
-msgstr ""
+msgstr "Pruvo"
 
 #: src/previewwidget.cpp:78
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Exercise"
-msgstr ""
+msgstr "Ekzerco"
 
 #: src/previewwidget.cpp:79
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Method"
-msgstr ""
+msgstr "Metodo"
 
 #: src/previewwidget.cpp:80
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
-msgstr "Katemark"
+msgstr "Rimarko"
 
 #: src/previewwidget.cpp:81
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
-msgstr "Atentu"
+msgstr "Solvo"
 
 #: src/previewwidget.cpp:121
 #, kde-format

@@ -347,91 +347,91 @@ msgstr "Kutipan"
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Definition"
-msgstr ""
+msgstr "Definisi"
 
 #: src/previewwidget.cpp:68
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Theorem"
-msgstr ""
+msgstr "Teorema"
 
 #: src/previewwidget.cpp:69
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Lemma"
-msgstr ""
+msgstr "Lema"
 
 #: src/previewwidget.cpp:70
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proposition"
-msgstr ""
+msgstr "Proposisi"
 
 #: src/previewwidget.cpp:71
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Corollary"
-msgstr ""
+msgstr "Akibat"
 
 #: src/previewwidget.cpp:72
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Axiom"
-msgstr ""
+msgstr "Aksioma"
 
 #: src/previewwidget.cpp:73
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Claim"
-msgstr ""
+msgstr "Klaim"
 
 #: src/previewwidget.cpp:74
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Assumption"
-msgstr ""
+msgstr "Asumsi"
 
 #: src/previewwidget.cpp:75
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Conjecture"
-msgstr ""
+msgstr "Konjektur"
 
 #: src/previewwidget.cpp:76
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Hypothesis"
-msgstr ""
+msgstr "Hipotesis"
 
 #: src/previewwidget.cpp:77
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Proof"
-msgstr ""
+msgstr "Bukti"
 
 #: src/previewwidget.cpp:78
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Exercise"
-msgstr ""
+msgstr "Latihan"
 
 #: src/previewwidget.cpp:79
 #, kde-format
 msgctxt "@title teaching callout"
 msgid "Method"
-msgstr ""
+msgstr "Metode"
 
 #: src/previewwidget.cpp:80
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Remark"
-msgstr "Katemark"
+msgstr "Catatan"
 
 #: src/previewwidget.cpp:81
-#, fuzzy, kde-format
+#, kde-format
 msgctxt "@title teaching callout"
 msgid "Solution"
-msgstr "Hati-hati"
+msgstr "Penyelesaian"
 
 #: src/previewwidget.cpp:121
 #, kde-format
