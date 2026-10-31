@@ -30,7 +30,8 @@ constexpr int MessageTimeoutMs = 5000;
 } // namespace
 
 // Show a short message at the top of the active view, the way Kate reports its own events.
-// With fileToOpen, the message carries a button that opens that file.
+// With fileToOpen, the message carries a button that opens that file and one that closes
+// the message.
 void PluginView::showMessage(const QString &text, bool isError, const QString &fileToOpen)
 {
     KTextEditor::View *view = m_mainWindow->activeView();
@@ -48,6 +49,9 @@ void PluginView::showMessage(const QString &text, bool isError, const QString &f
             QDesktopServices::openUrl(QUrl::fromLocalFile(fileToOpen));
         });
         message->addAction(action);
+        // A message with an action loses Kate's close button: give it back as a button.
+        const KGuiItem close = KStandardGuiItem::close();
+        message->addAction(new QAction(close.icon(), close.text(), message));
     }
     message->setView(view);
     message->setAutoHide(MessageTimeoutMs);
